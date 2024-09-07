@@ -1,0 +1,47 @@
+# **************************************************************************** #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    Makefile                                           :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: pmihangy <marvin@42.fr>                    +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2024/09/07 12:06:42 by pmihangy          #+#    #+#              #
+#    Updated: 2024/09/07 16:57:53 by pmihangy         ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
+
+## ARGUMENTS
+NAME = minishell
+SRC = main.c error.c utils.c
+SRC_FILES = $(addprefix src/, $(SRC))
+PARSER_FILES = lexer.c
+EXECUTION_FILES =  ## TODO
+BUILTINS_FILES = ## TODO
+SRC_FILES += $(addprefix src/parser/, $(PARSER_FILES))
+SRC_FILES += $(addprefix src/execution/, $(EXECUTION_FILES))
+SRC_FILES += $(addprefix src/builtins/, $(BUILTINS_FILES))
+CC = cc
+CFLAGS = -Wall -Wextra #-Werror
+RM = rm -rf
+INCLUDE = -I./include -I./libft
+LIBFT = ./libft
+LINKING = -L$(LIBFT) -lft -lreadline
+
+## RULES
+all: $(NAME)
+
+$(NAME): $(SRC_FILES)
+	make -C $(LIBFT)
+	$(CC) $(CFLAGS) $(INCLUDE) $(SRC_FILES) -o $(NAME) $(LINKING)
+
+clean:
+	make -C $(LIBFT) clean
+	$(RM) *.o
+
+fclean: clean
+	make -C $(LIBFT) fclean
+	$(RM) $(NAME)
+
+re: fclean all
+
+.PHONY: all clean fclean re
