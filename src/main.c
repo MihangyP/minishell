@@ -15,7 +15,7 @@
 int	main(void)
 {
 	char		*entry;
-	t_token	*root;
+	t_token		*root;
 
 	entry = readline("minishell> ");
 	if (entry == NULL)
@@ -23,11 +23,11 @@ int	main(void)
 	if (has_open_quote(entry, false, 0))
 	{
 		printf("open quote\n");
-		return (1); // TODO: break the REPL and show an error message like "open quote" 	
+		return (1); // TODO: show an error message like "open quote" 	
 	}
 	root = lexer(entry);
 	if (root == NULL)
-		return (1); // TODO: break the REPL and show an error message like "open quote" 	
+		return (1); // TODO: show an error message like "open quote" 	
 	print_tokens(root);
 	free(entry);
 	return (0);

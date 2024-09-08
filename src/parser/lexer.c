@@ -16,7 +16,7 @@ static int	trim_spaces(char *entry, int *cur)
 {
 	while (entry[*cur] && is_space(entry[*cur]))
 		(*cur)++;
-	if (!entry[*cur])
+	if (entry[*cur] == '\0')
 		return (2); // 2 to indicate that we are in the end of the string
 	return (0);
 }
@@ -37,6 +37,20 @@ int	calc_text_token_len(char *entry, int i)
 		++len;
 	}
 	return (len);
+}
+
+int	calc_text_in_quote_len(char *entry, int i, char quote)
+{
+	int	len;
+
+	len = 0;
+	i++;
+	while (entry[i] != quote)
+	{
+		++i;
+		++len;
+	}
+	return (len + 2);
 }
 
 t_token	*new_token(char *text, t_identifier identifier)
@@ -76,6 +90,8 @@ void	tokens_append(t_token **root, t_token *new)
 }
 
 // echo "Hello World" > donto.txt 
+// TODO: refactor this function
+// Manage string in a quotes
 
 t_token	*lexer(char *entry)
 {
@@ -105,10 +121,22 @@ t_token	*lexer(char *entry)
 			return (root);
 		if (trim_spaces(entry, &i) == 2)
 			return (root);
-		if (!is_operator(entry[i])) // if it is an argument
+		if (!is_operator(entry[i]) && tokens_find_last(root)->text[0] == '|') // if the last token is an pipe, the following is a CMD
 		{
 			token_len = calc_text_token_len(entry, i);
-			text = ft_substr(entry, i, token_len);	
+			text = ft_substr(entry, i, token_len);
+			if (text == NULL)
+				return (NULL);
+			tokens_append(&root, new_token(text, CMD));
+			i += token_len;
+		}
+		else if (!is_operator(entry[i])) // if it is an argument
+		{
+			if (entry[i] == '\"' || entry[i] == '\'')
+				token_len = calc_text_in_quote_len(entry, i, entry[i]);
+			else
+				token_len = calc_text_token_len(entry, i);
+			text = ft_strtrim(ft_substr(entry, i, token_len), "\"\'");	
 			if (text == NULL)
 				return (NULL);
 			tokens_append(&root, new_token(text, ARGUMENT));
