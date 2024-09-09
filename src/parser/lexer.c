@@ -53,6 +53,100 @@ int	calc_text_in_quote_len(char *entry, int i, char quote)
 	return (len + 2);
 }
 
+size_t	count_size(char **arr)
+{
+	size_t	size;
+
+	size = 0;
+	while (arr[size])
+		++size;
+	return (size);
+}
+
+int	calc_env_len(char *str, int i)
+{
+	int	env_len;
+
+	env_len = 0;
+	while (str[i] && !is_space(str[i]))
+	{
+		++env_len;
+		++i;
+	}
+	return (env_len);
+}
+
+//ex: $HOME$USER
+//    $HOME $USER
+//    $HOME USER
+//    HOME USER
+
+int	count_text_size(char **arr)
+{
+	int		size;
+	int		i;
+	int		j;
+	char	*env;
+
+	size = 0;
+	i = 0;
+	while (arr[i])
+	{
+		j = 0;
+		while (arr[i][j])
+		{
+			if (arr[i][j] != '$')
+			{
+				++size;
+				++j;	
+			}
+			else
+			{
+				env = getenv(ft_substr(arr[i], j + 1, calc_env_len(arr[i], j + 1)));
+				size += ft_strlen(env);	
+				j += ft_strlen(env); 
+			}
+		}
+		++i;
+	}
+	return (size);
+}
+
+char	*extract_text(char *text)
+{
+	char	**arr;
+	char	*s;
+	char	*env;
+	int		size;
+	int		i;
+	int		j;
+	int		t;
+
+	arr = ft_split(text, '$');
+	if (arr == NULL)
+		return (NULL);
+	printf("size: %ld\n", count_size(arr));
+	if (count_size(arr) == 1 && ft_strtrim(arr[0], " ")[0] != '$') // if has not a environnement variable
+		return (getenv(arr[0]));
+	size = count_text_size(arr);
+	s = malloc((size + 1) * sizeof(char));
+	if (s == NULL)
+		return (NULL);
+	i = 0;
+	t = 0;
+	while (arr[i])
+	{
+		j = 0;
+		while (arr[i][j])
+		{
+			// TODO
+		}
+		++i;
+	}
+	s[t] = '\0';
+	return (s);
+}
+
 t_token	*new_token(char *text, t_identifier identifier)
 {
 	t_token	*new;
@@ -92,6 +186,7 @@ void	tokens_append(t_token **root, t_token *new)
 // echo "Hello World" > donto.txt 
 // TODO: refactor this function
 // Manage string in a quotes
+// TODO: Replace environnement variable - Interpret if inside double quote, note interpret if inside single quote
 
 t_token	*lexer(char *entry)
 {
@@ -133,10 +228,19 @@ t_token	*lexer(char *entry)
 		else if (!is_operator(entry[i])) // if it is an argument
 		{
 			if (entry[i] == '\"' || entry[i] == '\'')
+			{
 				token_len = calc_text_in_quote_len(entry, i, entry[i]);
+				text = ft_strtrim(ft_substr(entry, i, token_len), "\"\'");
+				if (entry[i] == '\"')
+					text = extract_text(text); // TODO
+			}
 			else
+			{
 				token_len = calc_text_token_len(entry, i);
-			text = ft_strtrim(ft_substr(entry, i, token_len), "\"\'");	
+				text = ft_strtrim(ft_substr(entry, i, token_len), "\"\'");
+				if (text[0] == '$')
+					text = getenv(ft_substr(text, 1, ft_strlen(text) - 1));
+			}
 			if (text == NULL)
 				return (NULL);
 			tokens_append(&root, new_token(text, ARGUMENT));
