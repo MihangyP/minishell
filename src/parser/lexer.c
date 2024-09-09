@@ -6,7 +6,7 @@
 /*   By: pmihangy <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/07 12:17:10 by pmihangy          #+#    #+#             */
-/*   Updated: 2024/09/07 16:40:22 by pmihangy         ###   ########.fr       */
+/*   Updated: 2024/09/09 11:59:36 by pmihangy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,68 +53,61 @@ int	calc_text_in_quote_len(char *entry, int i, char quote)
 	return (len + 2);
 }
 
-size_t	count_size(char **arr)
+/*size_t	count_size(char **arr)*/
+/*{*/
+	/*size_t	size;*/
+
+	/*size = 0;*/
+	/*while (arr[size])*/
+		/*++size;*/
+	/*return (size);*/
+/*}*/
+
+
+int	calc_env_len(char *text, int start)
 {
-	size_t	size;
+	int	len;
 
-	size = 0;
-	while (arr[size])
-		++size;
-	return (size);
-}
-
-int	calc_env_len(char *str, int i)
-{
-	int	env_len;
-
-	env_len = 0;
-	while (str[i] && !is_space(str[i]))
+	len = 0;
+	while (text[start] && text[start] != '$' && !is_space(text[start]))
 	{
-		++env_len;
-		++i;
+		++len;
+		++start;
 	}
-	return (env_len);
+	return (len);
 }
 
-//ex: $HOME$USER
-//    $HOME $USER
-//    $HOME USER
-//    HOME USER
-
-int	count_text_size(char **arr)
+int	count_text_size(char *text)
 {
-	int		size;
 	int		i;
-	int		j;
+	int		size;
 	char	*env;
 
-	size = 0;
 	i = 0;
-	while (arr[i])
+	size = 0;
+	while (text[i])
 	{
-		j = 0;
-		while (arr[i][j])
+		if (text[i] != '$')
 		{
-			if (arr[i][j] != '$')
-			{
-				++size;
-				++j;	
-			}
-			else
-			{
-				env = getenv(ft_substr(arr[i], j + 1, calc_env_len(arr[i], j + 1)));
-				size += ft_strlen(env);	
-				j += ft_strlen(env); 
-			}
+			++size;
+			++i;
 		}
-		++i;
+		else
+		{
+			env = getenv(ft_substr(text, i + 1, calc_env_len(text, i + 1)));	
+			size += ft_strlen(env);
+			i += calc_env_len(text, i + 1) + 1;
+		}
 	}
 	return (size);
 }
 
+//ex: /user/pmihangy/$USER
+//    $HOME $USER
+//    $HOME USER
+//    HOME
 char	*extract_text(char *text)
 {
-	char	**arr;
 	char	*s;
 	char	*env;
 	int		size;
@@ -122,28 +115,34 @@ char	*extract_text(char *text)
 	int		j;
 	int		t;
 
-	arr = ft_split(text, '$');
-	if (arr == NULL)
-		return (NULL);
-	printf("size: %ld\n", count_size(arr));
-	if (count_size(arr) == 1 && ft_strtrim(arr[0], " ")[0] != '$') // if has not a environnement variable
-		return (getenv(arr[0]));
-	size = count_text_size(arr);
+	size = count_text_size(text);
 	s = malloc((size + 1) * sizeof(char));
 	if (s == NULL)
 		return (NULL);
 	i = 0;
-	t = 0;
-	while (arr[i])
+	j = 0;
+	while (text[i])
 	{
-		j = 0;
-		while (arr[i][j])
+		if (text[i] != '$')
 		{
-			// TODO
+			s[j] = text[i];
+			++j;
+			++i;
 		}
-		++i;
+		else
+		{
+			env = getenv(ft_substr(text, i + 1, calc_env_len(text, i + 1)));	
+			t = 0;
+			while (env[t])
+			{
+				s[j] = env[t];
+				++j;
+				++t;
+			}
+			i += calc_env_len(text, i + 1) + 1;
+		}
 	}
-	s[t] = '\0';
+	s[j] = '\0';
 	return (s);
 }
 
@@ -181,6 +180,21 @@ void	tokens_append(t_token **root, t_token *new)
 	}
 	last = tokens_find_last(*root);
 	last->next = new;
+}
+
+
+bool	has_an_env(char *text)
+{
+	int	i;
+
+	i = 0;
+	while (text[i])
+	{
+		if (text[i] == '$')
+			return (true);
+		++i;
+	}
+	return (false);
 }
 
 // echo "Hello World" > donto.txt 
@@ -231,7 +245,7 @@ t_token	*lexer(char *entry)
 			{
 				token_len = calc_text_in_quote_len(entry, i, entry[i]);
 				text = ft_strtrim(ft_substr(entry, i, token_len), "\"\'");
-				if (entry[i] == '\"')
+				if (entry[i] == '\"' && has_an_env(text))
 					text = extract_text(text); // TODO
 			}
 			else
