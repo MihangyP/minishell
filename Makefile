@@ -6,7 +6,7 @@
 #    By: pmihangy <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/09/07 12:06:42 by pmihangy          #+#    #+#              #
-#    Updated: 2024/09/07 16:57:53 by pmihangy         ###   ########.fr        #
+#    Updated: 2024/09/10 10:57:45 by pmihangy         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -14,7 +14,7 @@
 NAME = minishell
 SRC = main.c error.c utils.c
 SRC_FILES = $(addprefix src/, $(SRC))
-PARSER_FILES = lexer.c
+PARSER_FILES = lexer.c bool.c list_manip.c utils.c
 EXECUTION_FILES =  ## TODO
 BUILTINS_FILES = ## TODO
 SRC_FILES += $(addprefix src/parser/, $(PARSER_FILES))
