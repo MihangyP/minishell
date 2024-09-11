@@ -6,7 +6,7 @@
 /*   By: pmihangy <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/07 12:17:10 by pmihangy          #+#    #+#             */
-/*   Updated: 2024/09/10 11:59:34 by pmihangy         ###   ########.fr       */
+/*   Updated: 2024/09/11 09:33:37 by pmihangy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,13 +53,94 @@ char	*extract_text(char *text)
 	return (s);
 }
 
+bool	insert_cmd_token(char *entry, t_token **root, int *i)
+{
+	char	*text;
+	int		token_len;
+
+	token_len = calc_text_token_len(entry, *i);
+	text = ft_substr(entry, *i, token_len);
+	if (text == NULL)
+		return (false);
+	tokens_append(root, new_token(text, CMD));
+	(*i) += token_len;
+	return (true);
+}
+
+bool	insert_argument_token(char *entry, t_token **root, int *i)
+{
+	char	*text;
+	int		token_len;
+
+	if (entry[*i] == '\"' || entry[*i] == '\'')
+	{
+		token_len = calc_text_in_quote_len(entry, *i, entry[*i]);
+		text = ft_strtrim(ft_substr(entry, *i, token_len), "\"\'");
+		if (entry[*i] == '\"' && has_an_env(text))
+			text = extract_text(text);
+	}
+	else
+	{
+		token_len = calc_text_token_len(entry, *i);
+		text = ft_strtrim(ft_substr(entry, *i, token_len), "\"\'");
+		if (text[0] == '$')
+			text = getenv(ft_substr(text, 1, ft_strlen(text) - 1));
+	}
+	if (text == NULL)
+		return (false);
+	tokens_append(root, new_token(text, ARGUMENT));
+	(*i) += token_len;
+	return (true);
+}
+
+bool	insert_redirections_token(char *entry, t_token **root, int *i)
+{
+	char	*text;
+	char	quote;
+
+	quote = entry[*i];
+	if (entry[*i + 1] == quote)
+	{
+		text = ft_substr(entry, *i, 2);
+		if (text == NULL)
+			return (false);
+		if (entry[*i] == '<')
+			tokens_append(root, new_token(text, DOUBLE_LEFT_REDIRECTION));
+		else
+			tokens_append(root, new_token(text, DOUBLE_RIGHT_REDIRECTION));
+		(*i) += 2;
+	}
+	else
+	{
+		text = ft_substr(entry, *i, 1);
+		if (text == NULL)
+			return (false);
+		if (entry[*i] == '<')
+			tokens_append(root, new_token(text, LEFT_REDIRECTION));
+		else
+			tokens_append(root, new_token(text, RIGHT_REDIRECTION));
+		(*i)++;
+	}
+	return (true);
+}
+
+bool	insert_pipe_token(char *entry, t_token **root, int *i)
+{
+	char	*text;
+
+	text = ft_substr(entry, *i, 1);
+	if (text == NULL)
+		return (false);
+	tokens_append(root, new_token(text, PIPE));
+	(*i)++;
+	return (true);
+}
+
 t_token	*lexer(char *entry)
 {
 	t_token	*root;
 	int		i;
 	int		tmp;
-	int		token_len;
-	char	*text;
 
 	root = NULL;
 	i = 0;
@@ -68,83 +149,28 @@ t_token	*lexer(char *entry)
 	tmp = i;
 	while (entry[i])
 	{
-		if (i == tmp)
-		{
-			token_len = calc_text_token_len(entry, i);
-			text = ft_substr(entry, i, token_len);
-			if (text == NULL)
+		if (i == tmp && !insert_cmd_token(entry, &root, &i))
 				return (NULL);
-			tokens_append(&root, new_token(text, CMD));
-			i += token_len;
-		}
 		if (!entry[i])
 			return (root);
 		if (trim_spaces(entry, &i) == 2)
 			return (root);
 		if (!is_operator(entry[i]) && tokens_find_last(root)->text[0] == '|') // if the last token is an pipe, the following is a CMD
 		{
-			token_len = calc_text_token_len(entry, i);
-			text = ft_substr(entry, i, token_len);
-			if (text == NULL)
+			if (!insert_cmd_token(entry, &root, &i))
 				return (NULL);
-			tokens_append(&root, new_token(text, CMD));
-			i += token_len;
 		}
-		else if (!is_operator(entry[i])) // if it is an argument
-		{
-			if (entry[i] == '\"' || entry[i] == '\'')
-			{
-				token_len = calc_text_in_quote_len(entry, i, entry[i]);
-				text = ft_strtrim(ft_substr(entry, i, token_len), "\"\'");
-				if (entry[i] == '\"' && has_an_env(text))
-					text = extract_text(text);
-			}
-			else
-			{
-				token_len = calc_text_token_len(entry, i);
-				text = ft_strtrim(ft_substr(entry, i, token_len), "\"\'");
-				if (text[0] == '$')
-					text = getenv(ft_substr(text, 1, ft_strlen(text) - 1));
-			}
-			if (text == NULL)
-				return (NULL);
-			tokens_append(&root, new_token(text, ARGUMENT));
-			i += token_len;
-		}
+		else if (!is_operator(entry[i]) && !insert_argument_token(entry, &root, &i)) // if it is an argument
+			return (NULL);
 		else if (is_operator(entry[i]) && (entry[i] == '<' || entry[i] == '>')) // if it is an operator
 		{
-			char	quote = entry[i];
-
-			if (entry[i + 1] == quote)
-			{
-				text = ft_substr(entry, i, 2);
-				if (text == NULL)
-					return (NULL);
-				if (entry[i] == '<')
-					tokens_append(&root, new_token(text, DOUBLE_LEFT_REDIRECTION));
-				else
-					tokens_append(&root, new_token(text, DOUBLE_RIGHT_REDIRECTION));
-				i += 2;
-			}
-			else
-			{
-				text = ft_substr(entry, i, 1);
-				if (text == NULL)
-					return (NULL);
-				if (entry[i] == '<')
-					tokens_append(&root, new_token(text, LEFT_REDIRECTION));
-				else
-					tokens_append(&root, new_token(text, RIGHT_REDIRECTION));
-				i++;
-			}
+			if (!insert_redirections_token(entry, &root, &i))
+				return (NULL);
 		}
 		else if (is_operator(entry[i]) && entry[i] == '|') // if it is an operator
 		{
-			text = ft_substr(entry, i, 1);
-			if (text == NULL)
+			if (!insert_pipe_token(entry, &root, &i))
 				return (NULL);
-			tokens_append(&root, new_token(text, PIPE));
-			i++;
 		}
 	}
 	return (root);
