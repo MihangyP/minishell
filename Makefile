@@ -14,7 +14,7 @@
 NAME = minishell
 SRC = main.c error.c utils.c
 SRC_FILES = $(addprefix src/, $(SRC))
-PARSER_FILES = lexer.c bool.c list_manip.c utils.c
+PARSER_FILES = lexer.c bool.c list_manip.c utils.c parser.c
 EXECUTION_FILES =  ## TODO
 BUILTINS_FILES = ## TODO
 SRC_FILES += $(addprefix src/parser/, $(PARSER_FILES))

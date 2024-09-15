@@ -21,6 +21,7 @@ t_token	*new_token(char *text, t_identifier identifier)
 		return (NULL);
 	new->text = text;
 	new->identifier = identifier;
+	new->prev = NULL;
 	new->next = NULL;
 	return (new);
 }
@@ -46,4 +47,5 @@ void	tokens_append(t_token **root, t_token *new_el)
 	}
 	last = tokens_find_last(*root);
 	last->next = new_el;
+	new_el->prev = last;
 }

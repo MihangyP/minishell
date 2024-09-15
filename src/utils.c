@@ -28,3 +28,8 @@ void	print_tokens(t_token *root)
 		curr = curr->next;
 	}
 }
+
+void	print_ast(t_ast	*ast_root)
+{
+	printf("Print ast\n");
+}

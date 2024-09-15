@@ -38,10 +38,29 @@ typedef enum	e_identifier
 
 typedef struct	s_token
 {
-	char		*text;
+	char			*text;
 	t_identifier	identifier;
+	struct s_token	*prev;
 	struct s_token	*next;
 }	t_token;
+
+// ex: echo "donto" > donto.txt | ls -l | pwd
+/*
+ *							|
+ *					|  				pwd
+ *			     >     ls -l
+ *	echo "donto"   donto.txt
+ *
+ */
+
+typedef struct	s_ast
+{
+	char			*text;
+	t_identifier	identifier;
+	char			**argv; // if CMD
+	struct s_ast	*left;
+	struct s_ast	*right;
+}	t_ast;
 
 /* prototypes */
 
@@ -51,10 +70,12 @@ bool	has_open_quote(char *entry, bool found_peer, int i);
 /* utils */
 bool	is_space(char c);
 void	print_tokens(t_token *root);
+void	print_ast(t_ast *ast_root);
 
 /* parser */
 
 t_token	*lexer(char *entry);
+t_ast	*parse(t_token *token_root);
 /* bool */
 bool	is_operator(char c);
 bool	has_an_env(char *text);
