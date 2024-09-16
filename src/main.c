@@ -6,7 +6,7 @@
 /*   By: pmihangy <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/07 12:13:11 by pmihangy          #+#    #+#             */
-/*   Updated: 2024/09/07 13:32:55 by pmihangy         ###   ########.fr       */
+/*   Updated: 2024/09/16 11:40:10 by pmihangy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,15 +34,18 @@ int	main(void)
 	ast_root = parse(token_root); // TODO: implement the function
 	if (ast_root == NULL)
 		return (1);
+	char *tmp = "./src/builtins/";
+	char *path = ft_strjoin(tmp, ast_root->text);
+	execve(path, ast_root->argv, NULL);
 	/*print_ast(ast_root); // TODO: implement the function*/
-	printf("%s\n", ast_root->text);
-	printf("===ARGUMENTS===\n");
-	i = 0;
-	while (ast_root->argv[i])
-	{
-		printf("%s\n", ast_root->argv[i]);
-		++i;
-	}
+	/*printf("%s\n", ast_root->text);*/
+	/*printf("===ARGUMENTS===\n");*/
+	/*i = 0;*/
+	/*while (ast_root->argv[i])*/
+	/*{*/
+		/*printf("%s\n", ast_root->argv[i]);*/
+		/*++i;*/
+	/*}*/
 	free(entry);
 	return (0);
 }

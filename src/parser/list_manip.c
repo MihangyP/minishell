@@ -6,7 +6,7 @@
 /*   By: pmihangy <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 10:46:41 by pmihangy          #+#    #+#             */
-/*   Updated: 2024/09/10 10:55:28 by pmihangy         ###   ########.fr       */
+/*   Updated: 2024/09/16 11:00:59 by pmihangy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,4 +48,19 @@ void	tokens_append(t_token **root, t_token *new_el)
 	last = tokens_find_last(*root);
 	last->next = new_el;
 	new_el->prev = last;
+}
+
+size_t	list_size(t_token *token)
+{
+	size_t	size;
+
+	size = 0;
+	if (token == NULL)
+		return (0);
+	while (token)
+	{
+		++size;
+		token = token->next;
+	}
+	return (size);
 }

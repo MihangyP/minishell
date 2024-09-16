@@ -6,7 +6,7 @@
 /*   By: pmihangy <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/07 12:13:57 by pmihangy          #+#    #+#             */
-/*   Updated: 2024/09/10 10:57:19 by pmihangy         ###   ########.fr       */
+/*   Updated: 2024/09/16 11:01:22 by pmihangy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,6 +82,7 @@ bool	has_an_env(char *text);
 /* list manip */
 t_token	*new_token(char *text, t_identifier identifier);
 t_token	*tokens_find_last(t_token *root);
+size_t	list_size(t_token *token);
 void	tokens_append(t_token **root, t_token *new_el);
 /* utils */
 int		trim_spaces(char *entry, int *cur);

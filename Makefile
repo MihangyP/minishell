@@ -6,7 +6,7 @@
 #    By: pmihangy <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/09/07 12:06:42 by pmihangy          #+#    #+#              #
-#    Updated: 2024/09/10 10:57:45 by pmihangy         ###   ########.fr        #
+#    Updated: 2024/09/16 10:31:16 by pmihangy         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -20,7 +20,7 @@ BUILTINS_FILES = ## TODO
 SRC_FILES += $(addprefix src/parser/, $(PARSER_FILES))
 SRC_FILES += $(addprefix src/execution/, $(EXECUTION_FILES))
 SRC_FILES += $(addprefix src/builtins/, $(BUILTINS_FILES))
-CC = cc
+CC = cc -g
 CFLAGS = -Wall -Wextra #-Werror
 RM = rm -rf
 INCLUDE = -I./include -I./libft
