@@ -6,7 +6,7 @@
 /*   By: pmihangy <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/07 12:13:57 by pmihangy          #+#    #+#             */
-/*   Updated: 2024/09/16 11:01:22 by pmihangy         ###   ########.fr       */
+/*   Updated: 2024/09/17 11:54:18 by pmihangy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,7 +70,6 @@ bool	has_open_quote(char *entry, bool found_peer, int i);
 /* utils */
 bool	is_space(char c);
 void	print_tokens(t_token *root);
-void	print_ast(t_ast *ast_root);
 
 /* parser */
 

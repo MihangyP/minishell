@@ -30,28 +30,6 @@ t_node_ast	*create_ast(e_type type, char *value)
 	return (node);
 }
 
-void	print_ast(t_node_ast *node, int indent)
-{
-	int	i;
-
-	i = 0;
-	if (!node)
-		return ;
-	while (i < indent)
-	{
-		printf("	");
-		i++;
-	}
-	if (node->type == COMMAND)
-		printf("commande : %s\n", node->value);
-	if (node->type == ARGUMENT)
-		printf("argument : %s\n", node->value);
-	if (node->type == REDIRECTION)
-		printf("redirection: %s\n", node->value);
-	print_ast(node->left, indent + 1);
-	print_ast(node->right, indent + 1);
-
-}
 void free_ast(t_node_ast *node)
 {
 	if (!node)
