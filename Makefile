@@ -6,17 +6,19 @@
 #    By: pmihangy <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/09/07 12:06:42 by pmihangy          #+#    #+#              #
-#    Updated: 2024/09/16 10:31:16 by pmihangy         ###   ########.fr        #
+#    Updated: 2024/09/20 09:17:29 by pmihangy         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 ## ARGUMENTS
 NAME = minishell
-SRC = main.c error.c utils.c
+SRC = main.c 
 SRC_FILES = $(addprefix src/, $(SRC))
 PARSER_FILES = lexer.c bool.c list_manip.c utils.c parser.c
+UTILS_FILES = error.c utils.c
 EXECUTION_FILES =  ## TODO
 BUILTINS_FILES = ## TODO
+SRC_FILES += $(addprefix src/utils/, $(UTILS_FILES))
 SRC_FILES += $(addprefix src/parser/, $(PARSER_FILES))
 SRC_FILES += $(addprefix src/execution/, $(EXECUTION_FILES))
 SRC_FILES += $(addprefix src/builtins/, $(BUILTINS_FILES))

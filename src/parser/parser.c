@@ -1,17 +1,31 @@
-#include <minishell.h>
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   parser.c                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: pmihangy <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/09/20 09:15:59 by pmihangy          #+#    #+#             */
+/*   Updated: 2024/09/20 10:53:41 by pmihangy         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
-/*typedef struct	s_ast*/
-/*{*/
-	/*char			*text;*/
-	/*t_identifier	identifier;*/
-	/*char			**argv; // if CMD*/
-	/*struct s_ast	*left;*/
-	/*struct s_ast	*right;*/
-/*}	t_ast;*/
+#include <minishell.h>
 
 bool	has_operator(t_token *token)
 {
 	while (token)
+	{
+		if (is_operator(token->text[0]))
+			return (true);
+		token = token->next;
+	}
+	return (false);
+}
+
+bool	has_operator_tmp(t_token *token)
+{
+	while (token && token->identifier != PIPE)
 	{
 		if (is_operator(token->text[0]))
 			return (true);
@@ -67,23 +81,6 @@ bool	has_pipe(t_token *t)
 	return (false);
 }
 
-/*void	print_ast(t_ast *ast, int indent)*/
-/*{*/
-	/*int	i;*/
-
-	/*i = 0;*/
-	/*if (!ast)*/
-		/*return ;*/
-	/*while (i < indent)*/
-	/*{*/
-		/*printf("	");*/
-		/*i++;*/
-	/*}*/
-	/*printf("%s\n", ast->text);*/
-	/*print_ast(ast->left, indent + 1);*/
-	/*print_ast(ast->right, indent + 1);*/
-/*}*/
-
 t_ast	*new_node(t_token *token)
 {
 	t_ast	*new;
@@ -122,7 +119,7 @@ char	**insert_argv(t_token *last)
 
 	size = 0;
 	curr = last;
-	while (!is_operator(curr->text[0]))
+	while (curr && !is_operator(curr->text[0]))
 	{
 		++size;
 		curr = curr->next;
@@ -132,7 +129,7 @@ char	**insert_argv(t_token *last)
 		return (NULL);
 	curr = last;
 	i = 0;
-	while (!is_operator(curr->text[0]))
+	while (curr && !is_operator(curr->text[0]))
 	{
 		argv[i] = ft_strdup(curr->text);
 		if (argv[i] == NULL)
@@ -158,20 +155,86 @@ size_t	count_nb_operators(t_token *last)
 	return (counter);
 }
 
+size_t	count_nb_operators_tmp(t_token *tmp)
+{
+	size_t	counter;
+
+	counter = 0;
+	while (tmp)
+	{
+		if (tmp->text[0] != '|' && !is_operator(tmp->text[0]))
+			++counter;
+		tmp = tmp->next;
+	}
+	return (counter);
+}
+
+bool	create_ast_without_pipe(t_ast **ast, t_token *last)
+{
+	size_t	nb_operators;
+
+	*ast = new_node(last);
+	if (*ast == NULL)
+		return (false);
+	(*ast)->right = new_node(last->next);
+	if ((*ast)->right == NULL)
+		return (false);
+	nb_operators = count_nb_operators(last);
+	while (nb_operators != 0)
+	{
+		last = find_next_ast_node(last->prev);
+		(*ast)->left = new_node(last);
+		if ((*ast)->left->identifier == CMD && last->next->identifier == ARGUMENT)
+		{
+			(*ast)->left->argv = insert_argv(last->next);
+			if ((*ast)->left->argv == NULL)
+				return (false);
+		}
+		else if (is_operator(last->text[0]) && !is_operator(last->next->text[0]))
+			(*ast)->left->right = new_node(last->next); 		
+		ast = &((*ast)->left);
+		--nb_operators;
+	}
+	return (true);
+}
+
+bool	create_ast_with_pipe(t_ast **ast, t_token *last)
+{
+	size_t	nb_pipes;
+	size_t	nb_operators;
+	t_token	*tmp;
+
+	*ast = new_node(last);
+	if (*ast == NULL)
+		return (false);
+	tmp = last->next;
+	// RIGHT
+	if (!has_operator_tmp(tmp))
+	{
+		(*ast)->right = new_node(tmp); 
+		tmp = tmp->next;
+		if (tmp)
+			(*ast)->right->argv = insert_argv(tmp);
+	}
+	else
+	{
+		(*ast)->right = new_node(tmp); 
+		tmp = tmp->next;
+		nb_operators = count_nb_operators_tmp(tmp);
+		// TODO
+	}
+	// TODO: LEFT
+	return (true);
+}
+
 // TODO
-//t_ast *create_cmd(t_token *t)
-//{
-//}
-// echo "$HOME donto" man negga 
 t_ast	*parse(t_token *token_root)
 {
 	t_ast	*ast;
 	t_ast	**tmp;
 	t_token	*last;
-	size_t	nb_operators;
 	
 	ast = NULL;
-	nb_operators = 0;
 	if (!has_operator(token_root))
 	{
 		ast = create_cmd(token_root);
@@ -183,48 +246,18 @@ t_ast	*parse(t_token *token_root)
 		last = tokens_find_last(token_root);	
 		if (!has_pipe(last))
 		{
-			// echo "Donto" > donto.txt >> crimy.txt
 			while (!is_operator(last->text[0]))
 				last = last->prev;
-			tmp = &ast;
-			*tmp = new_node(last);
-			if (*tmp == NULL)
+			if (!create_ast_without_pipe(&ast, last))
 				return (NULL);
-			(*tmp)->right = new_node(last->next);
-			if ((*tmp)->right == NULL)
-				return (NULL);
-			nb_operators = count_nb_operators(last);
-			while (nb_operators != 0)
-			{
-				last = find_next_ast_node(last->prev);
-				(*tmp)->left = new_node(last);
-				if ((*tmp)->left->identifier == CMD && last->next->identifier == ARGUMENT)
-				{
-					(*tmp)->left->argv = insert_argv(last->next);
-					if ((*tmp)->left->argv == NULL)
-						return (NULL);
-				}
-				else if (is_operator(last->text[0]) && !is_operator(last->next->text[0]))
-					(*tmp)->left->right = new_node(last->next); 		
-				tmp = &(ast->left);
-				--nb_operators;
-			}
-			/*
-			last = find_next_ast_node(last->prev);
-			ast->left = new_node(last);
-			if (ast->left->identifier == CMD && last->next->identifier == ARGUMENT)
-			{
-				ast->left->argv = insert_argv(last->next);
-				if (ast->left->argv == NULL)
-					return (NULL);
-			}
-			*/
 		}
-		/*else*/
-		/*{*/
-			/*while (last->text[0] != '|')*/
-				/*last = last->prev;*/
-		/*}*/
+		else
+		{
+			while (last->text[0] != '|')
+				last = last->prev;
+			if (!create_ast_with_pipe(&ast, last))
+				return (NULL);
+		}
 	}
 	return (ast);
 }
