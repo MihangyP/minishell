@@ -6,7 +6,7 @@
 /*   By: pmihangy <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/07 12:13:11 by pmihangy          #+#    #+#             */
-/*   Updated: 2024/09/20 10:27:25 by pmihangy         ###   ########.fr       */
+/*   Updated: 2024/09/24 10:04:18 by pmihangy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,7 @@ int	main(void)
 	ast_root = parse(token_root);
 	if (ast_root == NULL)
 		return (1);
-	/*print_ast(ast_root, 0);*/
+	print_ast(ast_root, 0);
 	free(entry);
 	return (0);
 }
