@@ -175,9 +175,9 @@ size_t	count_nb_operators_with_pipe(t_token *tmp)
 	size_t	counter;
 
 	counter = 0;
-	while (tmp)
+	while (tmp && tmp->identifier != PIPE)
 	{
-		if (tmp->text[0] != '|' && is_operator(tmp->text[0]))
+		if (is_operator(tmp->text[0]))
 			++counter;
 		tmp = tmp->prev;
 	}
