@@ -6,7 +6,7 @@
 /*   By: pmihangy <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/20 09:15:59 by pmihangy          #+#    #+#             */
-/*   Updated: 2024/09/24 15:26:45 by pmihangy         ###   ########.fr       */
+/*   Updated: 2024/09/27 13:56:14 by pmihangy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -129,10 +129,10 @@ t_token	*find_next_pipe_or_cmd(t_token *token)
 {
 	t_token	*tmp;
 
-	while (token && token->identifier == PIPE)
+	while (token && token->identifier != PIPE)
 	{
 		tmp = token;
-		token = token->prev;;
+		token = token->prev;
 	}
 	if (!token)
 		return (tmp);
@@ -217,7 +217,7 @@ bool	fill_left(t_ast **ast, t_token *last)
 	size_t	nb_operators;
 
 	nb_operators = count_nb_operators(last);
-	while (nb_operators != 0)
+	while (nb_operators)
 	{
 		last = find_next_ast_node(last->prev);
 		(*ast)->left = new_node(last);
@@ -233,6 +233,55 @@ bool	fill_left(t_ast **ast, t_token *last)
 		--nb_operators;
 	}
 	return (true);
+}
+
+bool	has_operator_inside_pipe(t_token *token)
+{
+	while (token && token->identifier != PIPE)
+	{
+		if (is_operator(token->text[0]))
+			return (true);
+		token = token->next;
+	}
+	return (false);
+}
+
+t_token	*find_operator_inside_pipe(t_token *token)
+{
+	while (token && token->identifier != PIPE)
+		token = token->next;
+	token = token->prev;
+	while (token && !is_operator(token->text[0]))
+		token = token->prev;
+	return (token);
+}
+
+size_t	count_nb_operators_inside_pipe(t_token *token)
+{
+	size_t	counter;
+
+	counter = 0;
+	while (token && token->identifier != PIPE)
+	{
+		if (is_operator(token->text[0]))
+			++counter;
+		token = token->prev;
+	}
+	return (counter);
+}
+
+t_token	*find_next_op_inside_pipe(t_token *token)
+{
+	t_token	*tmp;
+
+	while (token->identifier != PIPE)
+	{
+		if (is_operator(token->text[0]))
+			return (token);
+		tmp = token;
+		token = token->prev;
+	}
+	return (tmp);
 }
 
 bool	fill_left_with_pipe_parent(t_ast **ast, t_token *last)
@@ -270,8 +319,36 @@ bool	fill_left_with_pipe_parent(t_ast **ast, t_token *last)
 			else
 			{
 				// TODO: (*ast)->right
-				token = find_operator_inside_pipe();
-				nb_operators_inside_pipe = count_nb_operators_inside_pipe(last);
+				// TODO: refactor inside a function
+				ast = &((*ast)->left);
+				token = find_operator_inside_pipe(last->next);
+				(*ast)->left->right = new_node(token);
+				if ((*ast)->left->right == NULL)
+					return (false);
+				(*ast)->left->right->right = new_node(token->next);
+				if ((*ast)->left->right->right == NULL)
+					return (false);
+				nb_operators_inside_pipe = count_nb_operators_inside_pipe(token);
+				while (nb_operators_inside_pipe)
+				{
+					token = find_next_op_inside_pipe(token->prev); 
+					(*ast)->left->right->left == new_node(token);
+					if ((*ast)->left->right->left == NULL)
+						return (false);
+					if (token->identifier == CMD && token->next->identifier == ARGUMENT)
+					{
+						(*ast)->left->right->left->argv = insert_argv(token);
+						if ((*ast)->left->right->left->argv == NULL) 
+							return (false);
+					}
+					if (is_operator(token->text[0]))
+					{
+						(*ast)->left->right->left->right = new_node(token->next);
+						if ((*ast)->left->right->left->right == NULL)
+							return (false);
+					}
+					--nb_operators_inside_pipe;
+				}
 			}
 		}
 		ast = &((*ast)->left);
@@ -337,16 +414,6 @@ t_token	*find_next_right_node(t_token *token)
 	return (token);
 }
 
-bool	has_operator_inside_pipe(t_token *token)
-{
-	while (token && token->identifier != PIPE)
-	{
-		if (is_operator(token->text[0]))
-			return (true);
-		token = token->next;
-	}
-	return (false);
-}
 
 bool	create_ast_with_pipe(t_ast **ast, t_token *last)
 {
@@ -397,7 +464,6 @@ bool	create_ast_with_pipe(t_ast **ast, t_token *last)
 t_ast	*parse(t_token *token_root)
 {
 	t_ast	*ast;
-	t_ast	**tmp;
 	t_token	*last;
 	
 	ast = NULL;
