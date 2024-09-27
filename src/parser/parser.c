@@ -125,6 +125,20 @@ t_token	*find_next_ast_node_with_pipe(t_token *last)
 	return (last);
 }
 
+t_token	*find_next_pipe_or_cmd(t_token *token)
+{
+	t_token	*tmp;
+
+	while (token && token->identifier == PIPE)
+	{
+		tmp = token;
+		token = token->prev;;
+	}
+	if (!token)
+		return (tmp);
+	return (token);
+}
+
 char	**insert_argv(t_token *last)
 {
 	char	**argv;
@@ -170,6 +184,20 @@ size_t	count_nb_operators(t_token *last)
 	return (counter);
 }
 
+size_t	count_nb_pipes(t_token *token)
+{
+	size_t	counter;
+
+	counter = 0;
+	while (token)
+	{
+		if (token->identifier == PIPE)	
+			++counter;
+		token = token->prev;
+	}
+	return (counter);
+}
+
 size_t	count_nb_operators_with_pipe(t_token *tmp)
 {
 	size_t	counter;
@@ -203,6 +231,51 @@ bool	fill_left(t_ast **ast, t_token *last)
 			(*ast)->left->right = new_node(last->next); 		
 		ast = &((*ast)->left);
 		--nb_operators;
+	}
+	return (true);
+}
+
+bool	fill_left_with_pipe_parent(t_ast **ast, t_token *last)
+{
+	size_t	nb_pipes;
+	size_t	nb_operators_inside_pipe;
+	t_token	*token;
+
+	nb_pipes = count_nb_pipes(last);
+	while (nb_pipes)
+	{
+		last = find_next_pipe_or_cmd(last->prev);
+		if (last->identifier == CMD)
+		{
+			// TODO:  si on arrive au dernier bloc sans pipe, on implement differemment;
+		}
+		else
+		{
+			(*ast)->left = new_node(last);
+			if ((*ast)->left == NULL)
+				return (false);
+			if (!has_operator_inside_pipe(last->next))
+			{
+				// TODO: (*ast)->right
+				(*ast)->left->right = new_node(last->next);
+				if ((*ast)->left->right == NULL)
+					return (false);
+				if (last->next->next->identifier == ARGUMENT)
+				{
+					(*ast)->left->right->argv = insert_argv(last->next);
+					if ((*ast)->left->right->argv == NULL)
+						return (false);
+				}
+			}
+			else
+			{
+				// TODO: (*ast)->right
+				token = find_operator_inside_pipe();
+				nb_operators_inside_pipe = count_nb_operators_inside_pipe(last);
+			}
+		}
+		ast = &((*ast)->left);
+		--nb_pipes;
 	}
 	return (true);
 }
@@ -264,20 +337,19 @@ t_token	*find_next_right_node(t_token *token)
 	return (token);
 }
 
-bool	has_operator_with_pipe_left(t_token *token)
+bool	has_operator_inside_pipe(t_token *token)
 {
 	while (token && token->identifier != PIPE)
 	{
 		if (is_operator(token->text[0]))
 			return (true);
-		token = token->prev;
+		token = token->next;
 	}
 	return (false);
 }
 
 bool	create_ast_with_pipe(t_ast **ast, t_token *last)
 {
-	size_t	nb_pipes;
 	t_token	*token;
 
 	*ast = new_node(last); 
@@ -309,9 +381,11 @@ bool	create_ast_with_pipe(t_ast **ast, t_token *last)
 			return (false);
 	}
 	// TODO: LEFT
+	if (!fill_left_with_pipe_parent(ast, last))
+		return (false);
 	/*if (!has_operator_with_pipe_left(last->prev))*/
 	/*{*/
-		/*printf("Tsisy\n");*/
+		
 	/*}*/
 	/*else*/
 	/*{*/
