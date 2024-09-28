@@ -274,7 +274,7 @@ t_token	*find_next_op_inside_pipe(t_token *token)
 {
 	t_token	*tmp;
 
-	while (token->identifier != PIPE)
+	while (token && token->identifier != PIPE)
 	{
 		if (is_operator(token->text[0]))
 			return (token);
@@ -347,8 +347,8 @@ bool	fill_left_with_pipe_parent(t_ast **ast, t_token *last)
 				(*ast)->left->right = new_node(last->next);
 				if ((*ast)->left->right == NULL)
 					return (false);
-				/*if (!fill_left_inside(&(*ast)->left->left, last))*/
-					/*return (false);*/
+				if (!fill_left_inside(&(*ast)->left, last))
+					return (false);
 			}
 		}
 		else
