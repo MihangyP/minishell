@@ -35,29 +35,51 @@ void	print_ast(t_ast *ast, int indent)
 	print_ast(ast->right, indent + 1);
 }
 
-int	main(void)
+bool	validate(t_ast *ast)
+{
+	
+}
+
+bool	repl(void)
 {
 	char		*entry;
 	t_token		*token_root;
 	t_ast		*ast_root;
 	int			i;
 
-	entry = readline("minishell> ");
-	if (entry == NULL)
-		return (1);
-	if (has_open_quote(entry, false, 0))
+	while (1)
 	{
-		printf("open quote\n");
-		return (1);
+		entry = readline("minishell> ");
+		if (entry == NULL)
+			return (false);
+		if (has_open_quote(entry, false, 0))
+			printf("open quote\n");
+		else
+		{
+			token_root = lexer(entry);
+			if (token_root == NULL)
+				return (free(entry), false);
+			ast_root = parse(token_root);
+			if (ast_root == NULL)
+				return (free(entry), false);
+			t_verif	verify = validate(ast_root);
+			if (!verify.res)
+				printf("comand not found: %s\n", verify.name);
+			else
+			{
+				printf("AST validated !\n");
+			}
+		}
+		free(entry);
 	}
-	token_root = lexer(entry);
-	if (token_root == NULL)
+	return (true);
+}
+
+// TODO: gerer les signals: Ctrl-C, Ctrl-D, Ctrl-
+
+int	main(void)
+{
+	if (!repl())
 		return (1);
-	/*print_tokens(token_root);*/
-	ast_root = parse(token_root);
-	if (ast_root == NULL)
-		return (1);
-	print_ast(ast_root, 0);
-	free(entry);
 	return (0);
 }

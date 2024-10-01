@@ -66,7 +66,8 @@ t_ast	*create_cmd(t_token *token_root)
 		token_root = token_root->next;
 		i++;
 	}
-	ast->argv[i] = NULL;
+	if (token_root)
+		ast->argv[i] = NULL;
 	return (ast);
 }
 

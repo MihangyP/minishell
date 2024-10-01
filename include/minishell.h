@@ -22,6 +22,10 @@
 # include <readline/readline.h>
 # include <readline/history.h>
 # include <libft.h>
+#include <signal.h>
+
+typedef void (*sighandler_t)(int);
+
 
 /* structures and enums */
 
