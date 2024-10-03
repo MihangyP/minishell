@@ -19,15 +19,17 @@
 # include <unistd.h>
 # include <fcntl.h>
 # include <stdbool.h>
+# include <signal.h>
 # include <readline/readline.h>
 # include <readline/history.h>
+# include <sys/types.h>
+# include <dirent.h>
 # include <libft.h>
-#include <signal.h>
-
-typedef void (*sighandler_t)(int);
 
 
 /* structures and enums */
+
+typedef void (*sighandler_t)(int);
 
 typedef enum	e_identifier
 {
@@ -48,15 +50,6 @@ typedef struct	s_token
 	struct s_token	*next;
 }	t_token;
 
-// ex: echo "donto" > donto.txt | ls -l | pwd
-/*
- *							|
- *					|  				pwd
- *			     >     ls -l
- *	echo "donto"   donto.txt
- *
- */
-
 typedef struct	s_ast
 {
 	char			*text;
@@ -64,7 +57,14 @@ typedef struct	s_ast
 	char			**argv; // if CMD
 	struct s_ast	*left;
 	struct s_ast	*right;
+	struct s_ast	*parent;
 }	t_ast;
+
+typedef struct	s_verif
+{
+	bool	res;
+	char	*name;
+}	t_verif;
 
 /* prototypes */
 
