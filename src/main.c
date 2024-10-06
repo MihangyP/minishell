@@ -81,39 +81,27 @@ bool	verif_inside(char *directory, char *cmd)
 	return (false);
 }
 
-t_verif *verify_if_in_path(char *cmd, char *path)
+size_t	verify_if_in_path(char *cmd, char *path)
 {
-	t_verif			*result;
-	char			**bins_dir;
-	char			**tmp;
-	int				i;
+	char	**bins_dir;
+	char		**tmp;
+	int			i;
 
-	result = malloc(sizeof(t_verif));
-	if (result == NULL)
-		return (NULL);
 	bins_dir = ft_split(path, ':');
 	if (bins_dir == NULL)
-		return (NULL);
+		return (2);
 	tmp = ft_split(bins_dir[0], '=');
 	if (tmp == NULL)
-		return (NULL);
+		return (2);
 	bins_dir[0] = tmp[1]; 
 	i = 0;
 	while (bins_dir[i])
 	{
-		if (verif_inside(bins_dir[i], cmd) == true)
-		{
-			result->res = true;
-			result->name = NULL;
-			return (result);
-		}
+		if (verif_inside(bins_dir[i], cmd))
+			return (1);
 		++i;
 	}
-	result->res = false;
-	result->name = ft_strdup(cmd);
-	if (result->name == NULL)
-		return (NULL);
-	return (result);
+	return (0);
 }
 
 bool	inside_builtins(char *cmd, char **builtins)
@@ -130,41 +118,10 @@ bool	inside_builtins(char *cmd, char **builtins)
 	return (false);
 }
 
-// TODO: find a way to iterate over the ast from the very left node
-t_verif	*verify_recursively(t_ast *left_node, char **builtins, char *path)
-{
-	t_verif	*result;	
-
-	result = malloc(sizeof(t_verif));
-	if (result == NULL)
-		return (NULL);
-	result->res = false;
-	result->name = ft_strdup(left_node->text);
-	if (result->name == NULL)
-		return (NULL);
-	if (left_node->identifier == CMD)
-	{
-		// TODO:  verify if in builtins
-		if (inside_builtins(left_node->text, builtins))	
-		{
-			result->res = true;
-			result->name = NULL;
-			return (result);
-		}
-		// TODO: verify if in PATH binaries
-		result = verify_in_path(left_node->text, path);
-		if (result == NULL)
-			return (NULL);
-	}
-	return (result);
-}
-
-t_verif	*validate(t_ast *ast, char *path)
+t_verif	*validate(t_token *token_root, char *path)
 {
 	t_verif	*result;
 	char	**builtins;
-	t_ast	*left_node;
-	int		i;
 
 	builtins = malloc(8 * sizeof(char *));
 	if (!builtins)
@@ -174,32 +131,27 @@ t_verif	*validate(t_ast *ast, char *path)
 		return (NULL);
 	if (!insert_builtins(builtins))	
 		return (NULL);
-	i = 0;
-	if (!ast->left && !ast->right)
+	result->res = true;
+	result->name = NULL;
+	while (token_root)
 	{
-		while (builtins[i])
+		if (token_root->identifier == CMD)
 		{
-			if (!ft_strncmp(ast->text, builtins[i], ft_strlen(ast->text)))
+			if (!inside_builtins(token_root->text, builtins))
 			{
-				result->res = true;
-				result->name = NULL;
-				return (result);
-			}	
-			++i;
+				if (!verify_if_in_path(token_root->text, path))
+				{
+					result->res = false;
+					result->name = ft_strdup(token_root->text);
+					if (result->name == NULL)
+						return (NULL);
+					return (result);
+				}
+				else if (verify_if_in_path(token_root->text, path) == 2)
+					return (NULL);
+			}
 		}
-		result = verify_if_in_path(ast->text, path);
-		if (result == NULL)
-			return (NULL);
-	}
-	else
-	{
-		// TODO: implement this function
-		left_node = ast;
-		while (left_node->left)
-			left_node = left_node->left;
-		result = verify_recursively(left_node, builtins, path);
-		if (result == NULL)
-			return (NULL);
+		token_root = token_root->next;
 	}
 	return (result);
 }
@@ -209,7 +161,6 @@ bool	repl(char *path)
 	char		*entry;
 	t_token		*token_root;
 	t_ast		*ast_root;
-	int			i;
 
 	while (1)
 	{
@@ -226,8 +177,7 @@ bool	repl(char *path)
 			ast_root = parse(token_root);
 			if (ast_root == NULL)
 				return (free(entry), false);
-			/*print_ast(ast_root, 0);*/
-			t_verif	*verify = validate(ast_root, path);
+			t_verif	*verify = validate(token_root, path);
 			if (verify == NULL)
 				return (false);
 			if (!verify->res)

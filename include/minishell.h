@@ -26,7 +26,6 @@
 # include <dirent.h>
 # include <libft.h>
 
-
 /* structures and enums */
 
 typedef void (*sighandler_t)(int);
