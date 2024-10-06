@@ -114,18 +114,12 @@ bool	inside_builtins(char *cmd, char **builtins)
 	return (false);
 }
 
-t_verif	*validate(t_token *token_root, char *path)
+t_verif	*validate(t_token *token_root, char *path, char **builtins)
 {
 	t_verif	*result;
-	char	**builtins;
 
-	builtins = malloc(8 * sizeof(char *));
-	if (!builtins)
-		return (NULL);
 	result = malloc(sizeof(t_verif));
 	if (!result)
-		return (NULL);
-	if (!insert_builtins(builtins))	
 		return (NULL);
 	result->res = true;
 	result->name = NULL;
@@ -157,7 +151,13 @@ bool	repl(char *path)
 	char		*entry;
 	t_token		*token_root;
 	t_ast		*ast_root;
+	char		**builtins;
 
+	builtins = malloc(8 * sizeof(char *));
+	if (!builtins)
+		return (NULL);
+	if (!insert_builtins(builtins))	
+		return (NULL);
 	while (1)
 	{
 		entry = readline("minishell> ");
@@ -173,11 +173,24 @@ bool	repl(char *path)
 			ast_root = parse(token_root);
 			if (ast_root == NULL)
 				return (free(entry), false);
-			t_verif	*verify = validate(token_root, path);
+			t_verif	*verify = validate(token_root, path, builtins);
 			if (verify == NULL)
 				return (false);
 			if (!verify->res)
 				printf("command '%s' not found\n", verify->name);
+			else
+			{
+				// TODO: exec builtins functions
+				if (!ast_root->left && !ast_root->right)
+				{
+					if (inside_builtins(ast_root->text, builtins))
+					{
+						echo(ast_root->argv + 1);
+						/*for (int j = 0; ast_root->argv[j]; ++j)	*/
+							/*printf("%s\n", ast_root->argv[j]);*/
+					}
+				}
+			}
 		}
 		free(entry);
 	}
