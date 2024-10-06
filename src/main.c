@@ -90,10 +90,6 @@ size_t	verify_if_in_path(char *cmd, char *path)
 	bins_dir = ft_split(path, ':');
 	if (bins_dir == NULL)
 		return (2);
-	tmp = ft_split(bins_dir[0], '=');
-	if (tmp == NULL)
-		return (2);
-	bins_dir[0] = tmp[1]; 
 	i = 0;
 	while (bins_dir[i])
 	{
@@ -190,15 +186,12 @@ bool	repl(char *path)
 
 int	main(int ac, char **av, char **env)
 {
-	char	*path;
+	int i;
 
-	int i = 0;
+	i = 0;
 	while (ft_strncmp(env[i], "PATH", 4))
 		++i;
-	path = ft_strdup(env[i]);
-	if (path == NULL)
-		return (1);
-	if (!repl(path))
+	if (!repl(env[i] + 5))
 		return (1);
 	return (0);
 }

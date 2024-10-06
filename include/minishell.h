@@ -93,4 +93,7 @@ int		calc_text_in_quote_len(char *entry, int i, char quote);
 int		calc_env_len(char *text, int start);
 int		count_text_size(char *text);
 
+/* builtins */
+void	echo(char **argv);
+
 #endif
