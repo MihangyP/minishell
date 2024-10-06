@@ -186,8 +186,6 @@ bool	repl(char *path)
 					if (inside_builtins(ast_root->text, builtins))
 					{
 						echo(ast_root->argv + 1);
-						/*for (int j = 0; ast_root->argv[j]; ++j)	*/
-							/*printf("%s\n", ast_root->argv[j]);*/
 					}
 				}
 			}
