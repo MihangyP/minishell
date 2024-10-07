@@ -6,7 +6,7 @@
 /*   By: pmihangy <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/07 12:13:11 by pmihangy          #+#    #+#             */
-/*   Updated: 2024/09/24 10:04:18 by pmihangy         ###   ########.fr       */
+/*   Updated: 2024/10/07 14:25:21 by pmihangy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -146,7 +146,7 @@ t_verif	*validate(t_token *token_root, char *path, char **builtins)
 	return (result);
 }
 
-bool	repl(char *path)
+bool	repl(char **env, char *path)
 {
 	char		*entry;
 	t_token		*token_root;
@@ -185,7 +185,22 @@ bool	repl(char *path)
 				{
 					if (inside_builtins(ast_root->text, builtins))
 					{
-						echo(ast_root->argv + 1);
+						if (!ft_strncmp(ast_root->text, "echo", 69))
+							echo_minishell(ast_root->argv);
+						else if (!ft_strncmp(ast_root->text, "env", 69))
+						{
+							if (ast_root->argv)
+								printf("usage: env\n");
+							else
+								env_minishell(env);
+						}
+						else if (!ft_strncmp(ast_root->text, "export", 69))
+						{
+							if (ast_root->argv)
+								export_minishell(env, ast_root->argv);	
+							else
+								env_minishell(env);
+						}
 					}
 				}
 			}
@@ -202,7 +217,7 @@ int	main(int ac, char **av, char **env)
 	i = 0;
 	while (ft_strncmp(env[i], "PATH", 4))
 		++i;
-	if (!repl(env[i] + 5))
+	if (!repl(env, env[i] + 5))
 		return (1);
 	return (0);
 }

@@ -6,7 +6,7 @@
 /*   By: pmihangy <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/07 12:13:57 by pmihangy          #+#    #+#             */
-/*   Updated: 2024/09/17 11:54:18 by pmihangy         ###   ########.fr       */
+/*   Updated: 2024/10/07 11:40:49 by pmihangy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,6 +94,8 @@ int		calc_env_len(char *text, int start);
 int		count_text_size(char *text);
 
 /* builtins */
-void	echo(char **argv);
+void	echo_minishell(char **argv);
+void	env_minishell(char **env);
+bool	export_minishell(char **env, char *to_export);
 
 #endif

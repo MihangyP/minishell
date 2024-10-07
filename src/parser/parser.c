@@ -6,7 +6,7 @@
 /*   By: pmihangy <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/20 09:15:59 by pmihangy          #+#    #+#             */
-/*   Updated: 2024/09/27 13:56:14 by pmihangy         ###   ########.fr       */
+/*   Updated: 2024/10/07 09:52:17 by pmihangy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,20 +45,18 @@ t_ast	*create_cmd(t_token *token_root)
 		return (NULL);
 	ast->text = token_root->text;
 	ast->identifier = token_root->identifier;
+	ast->argv = NULL;
 	ast->left = NULL;
 	ast->right = NULL;
 	ast->parent = NULL;
 	token_root = token_root->next;
 	if (token_root)
 	{
-		ast->argv = malloc((list_size(token_root) + 2) * sizeof(char *));
+		ast->argv = malloc((list_size(token_root) + 1) * sizeof(char *));
 		if (ast->argv == NULL)
 			return (NULL);
-		ast->argv[0] = ft_strdup(ast->text);
-		if (ast->argv[0] == NULL)
-			return (NULL);
 	}
-	i = 1;
+	i = 0;
 	while (token_root)
 	{
 		ast->argv[i] = ft_strdup(token_root->text);

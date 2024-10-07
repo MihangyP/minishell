@@ -6,7 +6,7 @@
 #    By: pmihangy <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/09/07 12:06:42 by pmihangy          #+#    #+#              #
-#    Updated: 2024/09/20 09:17:29 by pmihangy         ###   ########.fr        #
+#    Updated: 2024/10/07 11:46:21 by pmihangy         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -17,7 +17,7 @@ SRC_FILES = $(addprefix src/, $(SRC))
 PARSER_FILES = lexer.c bool.c list_manip.c utils.c parser.c
 UTILS_FILES = error.c utils.c
 EXECUTION_FILES =  ## TODO
-BUILTINS_FILES = echo.c
+BUILTINS_FILES = echo.c env.c export.c
 SRC_FILES += $(addprefix src/utils/, $(UTILS_FILES))
 SRC_FILES += $(addprefix src/parser/, $(PARSER_FILES))
 SRC_FILES += $(addprefix src/execution/, $(EXECUTION_FILES))
