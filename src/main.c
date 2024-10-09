@@ -6,7 +6,7 @@
 /*   By: pmihangy <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/07 12:13:11 by pmihangy          #+#    #+#             */
-/*   Updated: 2024/10/07 14:25:21 by pmihangy         ###   ########.fr       */
+/*   Updated: 2024/10/09 09:42:47 by pmihangy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -195,12 +195,7 @@ bool	repl(char **env, char *path)
 								env_minishell(env);
 						}
 						else if (!ft_strncmp(ast_root->text, "export", 69))
-						{
-							if (ast_root->argv)
-								export_minishell(env, ast_root->argv);	
-							else
-								env_minishell(env);
-						}
+							export_minishell(env, ast_root->argv);	
 					}
 				}
 			}
