@@ -138,29 +138,21 @@ bool	has_quote(char *str)
 	return (false);
 }
 
-char	*normalize_str(char *str)
+bool	is_surround_by_quotes(char *str)
 {
-	char	*res;
-	char	quote;
-	size_t	size;
 	int		i;
-	int		j;
+	char	quote;
 
-	size = ft_strlen(str) - 2;
-	res = malloc((size + 1) * sizeof(char));
-	if (res == NULL)
-		return (NULL);
-	i = 0;
-	j = 0;
-	while (str[i])
-	{
-		if (str[i] == '\"' || str[i] == '\'')
-		{
-			quote = str[i];
-			++i;
-		}
-		++i;
-	}
+	i = ft_strlen(str) - 2;
+	printf("0: %c\n", str[0]);
+	printf("l: %c\n", str[i]);
+	/*if (str[0] == '\'' || str[0] == '\"')*/
+	/*{*/
+		/*quote = str[0];*/
+		/*if (str[j] == quote)*/
+			/*return (true);*/
+	/*}*/
+	return (false);
 }
 
 bool	export_minishell(char **env, char **to_export)
@@ -177,25 +169,28 @@ bool	export_minishell(char **env, char **to_export)
 	i = 0;
 	while (to_export[i])
 	{
-		if (has_open_quote(to_export[i], false, 0))
-			printf("open quote\n");
-		if (!has_equal(to_export[i]))
-		{
-			if (has_quote(to_export[i]))
-			{
-				str = normalize_str(to_export[i]);	
-				if (str == NULL)
-					return (false);
-				if (!validate(str))
-				{
-					printf("%s is not valid\n", str);
-				}
-			}
-		}
-		else
-		{
-			// TODO: do the same thing	
-		}
+		/*if (has_open_quote(to_export[i], false, 0))*/
+			/*printf("open quote\n");*/
+		/*if (!has_equal(to_export[i]))*/
+		/*{*/
+			/*if (has_quote(to_export[i]))*/
+			/*{*/
+				/*if (is_surround_by_quotes(to_export[i]))*/
+				/*{*/
+					/*printf("is surrounded\n");*/
+					/*[>str = trim_str(to_export[i]);<]*/
+					/*[>if (str == NULL)<]*/
+						/*[>return (false);<]*/
+					/*[>if (!validate(str))<]*/
+						/*[>printf("%s is not valid\n", str);<]*/
+				/*}*/
+			/*}*/
+		/*}*/
+		/*else*/
+		/*{*/
+			/*// TODO: do the same thing	*/
+		/*}*/
+		printf("%s\n", to_export[i]);
 		++i;
 	}
 	return (true);

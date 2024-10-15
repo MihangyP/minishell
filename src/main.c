@@ -205,14 +205,23 @@ bool	repl(char **env, char *path)
 	return (true);
 }
 
-int	main(int ac, char **av, char **env)
+char	*get_path(char **env)
 {
-	int i;
+	int	i;
 
 	i = 0;
 	while (ft_strncmp(env[i], "PATH", 4))
 		++i;
-	if (!repl(env, env[i] + 5))
+	return (env[i] + 5);
+}
+
+int	main(int ac, char **av, char **env)
+{
+	int		i;
+	char	*path;
+
+	path = get_path(env);
+	if (!repl(env, path))
 		return (1);
 	return (0);
 }
