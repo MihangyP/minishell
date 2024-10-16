@@ -26,6 +26,10 @@
 # include <dirent.h>
 # include <libft.h>
 
+/* Macros */
+
+# define IF_RETURN(condition, value) if (condition) return (value);
+
 /* structures and enums */
 
 typedef void (*sighandler_t)(int);
@@ -53,7 +57,7 @@ typedef struct	s_ast
 {
 	char			*text;
 	t_identifier	identifier;
-	char			**argv; // if CMD
+	char			**argv;
 	struct s_ast	*left;
 	struct s_ast	*right;
 	struct s_ast	*parent;
@@ -78,6 +82,8 @@ void	print_tokens(t_token *root);
 
 t_token	*lexer(char *entry);
 t_ast	*parse(t_token *token_root);
+bool	insert_argument_token(char *entry, t_token **root, int *i);
+bool	insert_cmd_token(char *entry, t_token **root, int *i);
 /* bool */
 bool	is_operator(char c);
 bool	has_an_env(char *text);

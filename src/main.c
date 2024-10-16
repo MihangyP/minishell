@@ -38,26 +38,19 @@ void	print_ast(t_ast *ast, int indent)
 bool	insert_builtins(char **builtins)
 {
 	builtins[0] = ft_strdup("echo");
-	if (builtins[0] == NULL)
-		return (false);
+	IF_RETURN(!builtins[0], false)
 	builtins[1] = ft_strdup("cd");
-	if (builtins[1] == NULL)
-		return (false);
+	IF_RETURN(!builtins[1], false)
 	builtins[2] = ft_strdup("pwd");
-	if (builtins[2] == NULL)
-		return (false);
+	IF_RETURN(!builtins[2], false)
 	builtins[3] = ft_strdup("export");
-	if (builtins[3] == NULL)
-		return (false);
+	IF_RETURN(!builtins[3], false)
 	builtins[4] = ft_strdup("unset");
-	if (builtins[4] == NULL)
-		return (false);
+	IF_RETURN(!builtins[4], false)
 	builtins[5] = ft_strdup("env");
-	if (builtins[5] == NULL)
-		return (false);
+	IF_RETURN(!builtins[5], false)
 	builtins[6] = ft_strdup("exit");
-	if (builtins[6] == NULL)
-		return (false);
+	IF_RETURN(!builtins[6], false)
 	builtins[7] = NULL;
 	return (true);
 }
@@ -68,13 +61,11 @@ bool	verif_inside(char *directory, char *cmd)
 	struct dirent	*dirr;
 
 	dirp = opendir(directory);
-	if (dirp == NULL)
-		return (false);
+	IF_RETURN(!dirp, false)
 	dirr = readdir(dirp);
 	while (dirr)
 	{
-		if (!ft_strncmp(cmd, dirr->d_name, 69))
-			return (true);
+		IF_RETURN(!ft_strncmp(cmd, dirr->d_name, 69), true)
 		dirr = readdir(dirp);
 	}
 	closedir(dirp);
@@ -88,13 +79,11 @@ size_t	verify_if_in_path(char *cmd, char *path)
 	int			i;
 
 	bins_dir = ft_split(path, ':');
-	if (bins_dir == NULL)
-		return (2);
+	IF_RETURN(!bins_dir, 2)
 	i = 0;
 	while (bins_dir[i])
 	{
-		if (verif_inside(bins_dir[i], cmd))
-			return (1);
+		IF_RETURN(verif_inside(bins_dir[i], cmd), 1)
 		++i;
 	}
 	return (0);
@@ -107,8 +96,7 @@ bool	inside_builtins(char *cmd, char **builtins)
 	i = 0;
 	while (builtins[i])
 	{
-		if (!ft_strncmp(cmd, builtins[i], 69))
-			return (true);
+		IF_RETURN(!ft_strncmp(cmd, builtins[i], 69), true)
 		++i;
 	}
 	return (false);
@@ -119,8 +107,7 @@ t_verif	*validate(t_token *token_root, char *path, char **builtins)
 	t_verif	*result;
 
 	result = malloc(sizeof(t_verif));
-	if (!result)
-		return (NULL);
+	IF_RETURN(!result, NULL)
 	result->res = true;
 	result->name = NULL;
 	while (token_root)
@@ -133,8 +120,7 @@ t_verif	*validate(t_token *token_root, char *path, char **builtins)
 				{
 					result->res = false;
 					result->name = ft_strdup(token_root->text);
-					if (result->name == NULL)
-						return (NULL);
+					IF_RETURN(!result->name, NULL)
 					return (result);
 				}
 				else if (verify_if_in_path(token_root->text, path) == 2)
@@ -154,15 +140,13 @@ bool	repl(char **env, char *path)
 	char		**builtins;
 
 	builtins = malloc(8 * sizeof(char *));
-	if (!builtins)
-		return (NULL);
+	IF_RETURN(!builtins, NULL)
 	/*if (!insert_builtins(builtins))	*/
 		/*return (NULL);*/
 	/*while (1)*/
 	/*{*/
 		entry = readline("minishell> ");
-		if (entry == NULL)
-			return (false);
+		IF_RETURN(!entry, false)
 		if (has_open_quote(entry, false, 0))
 			printf("open quote\n");
 		else
@@ -223,14 +207,12 @@ char	*get_path(char **env)
 // - BUILD a TOKENIZER (TODO: improve and refactor)
 // - BUILD a AST
 // - EXEC BY TRAVERSING THE AST
-
 int	main(int ac, char **av, char **env)
 {
 	int		i;
 	char	*path;
 
 	path = get_path(env);
-	if (!repl(env, path))
-		return (1);
+	IF_RETURN(!repl(env, path), 1)
 	return (0);
 }
