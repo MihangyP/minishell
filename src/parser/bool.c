@@ -24,8 +24,7 @@ bool	has_an_env(char *text)
 	i = 0;
 	while (text[i])
 	{
-		if (text[i] == '$')
-			return (true);
+		IF_RETURN(text[i] == '$', true)
 		++i;
 	}
 	return (false);

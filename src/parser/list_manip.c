@@ -20,8 +20,7 @@ t_token	*new_token(char *text, t_identifier identifier)
 	t_token	*new;
 
 	new = malloc(sizeof(t_token));
-	if (new == NULL)
-		return (NULL);
+	IF_RETURN(!new, NULL)
 	new->text = text;
 	new->identifier = identifier;
 	new->prev = NULL;
@@ -67,8 +66,7 @@ size_t	list_size(t_token *token)
 	size_t	size;
 
 	size = 0;
-	if (token == NULL)
-		return (0);
+	IF_RETURN(!token, 0)
 	while (token)
 	{
 		++size;

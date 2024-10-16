@@ -19,8 +19,7 @@ int	trim_spaces(char *entry, int *cur)
 {
 	while (entry[*cur] && is_space(entry[*cur]))
 		(*cur)++;
-	if (entry[*cur] == '\0')
-		return (2);
+	IF_RETURN(entry[*cur] == '\0', 2)
 	return (0);
 }
 

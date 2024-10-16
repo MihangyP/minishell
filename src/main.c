@@ -141,10 +141,9 @@ bool	repl(char **env, char *path)
 
 	builtins = malloc(8 * sizeof(char *));
 	IF_RETURN(!builtins, NULL)
-	/*if (!insert_builtins(builtins))	*/
-		/*return (NULL);*/
-	/*while (1)*/
-	/*{*/
+	IF_RETURN(!insert_builtins(builtins), NULL)
+	while (1)
+	{
 		entry = readline("minishell> ");
 		IF_RETURN(!entry, false)
 		if (has_open_quote(entry, false, 0))
@@ -155,38 +154,37 @@ bool	repl(char **env, char *path)
 			if (token_root == NULL)
 				return (free(entry), false);
 			print_tokens(token_root);
-			/*ast_root = parse(token_root);*/
-			/*if (ast_root == NULL)*/
-				/*return (free(entry), false);*/
-			/*t_verif	*verify = validate(token_root, path, builtins);*/
-			/*if (verify == NULL)*/
-				/*return (false);*/
-			/*if (!verify->res)*/
-				/*printf("command '%s' not found\n", verify->name);*/
-			/*else*/
-			/*{*/
-				/*// TODO: exec builtins functions*/
-				/*if (!ast_root->left && !ast_root->right)*/
-				/*{*/
-					/*if (inside_builtins(ast_root->text, builtins))*/
-					/*{*/
-						/*if (!ft_strncmp(ast_root->text, "echo", 69))*/
-							/*echo_minishell(ast_root->argv);*/
-						/*else if (!ft_strncmp(ast_root->text, "env", 69))*/
-						/*{*/
-							/*if (ast_root->argv)*/
-								/*printf("usage: env\n");*/
-							/*else*/
-								/*env_minishell(env);*/
-						/*}*/
-						/*else if (!ft_strncmp(ast_root->text, "export", 69))*/
-							/*export_minishell(env, ast_root->argv);	*/
-					/*}*/
-				/*}*/
-			/*}*/
+			ast_root = parse(token_root);
+			if (ast_root == NULL)
+				return (free(entry), false);
+			t_verif	*verify = validate(token_root, path, builtins);
+			IF_RETURN(!verify, false)
+			if (!verify->res)
+				printf("command '%s' not found\n", verify->name);
+			else
+			{
+				// TODO: exec builtins functions
+				if (!ast_root->left && !ast_root->right)
+				{
+					if (inside_builtins(ast_root->text, builtins))
+					{
+						if (!ft_strncmp(ast_root->text, "echo", 69))
+							echo_minishell(ast_root->argv);
+						else if (!ft_strncmp(ast_root->text, "env", 69))
+						{
+							if (ast_root->argv)
+								printf("usage: env\n");
+							else
+								env_minishell(env);
+						}
+						else if (!ft_strncmp(ast_root->text, "export", 69))
+							export_minishell(env, ast_root->argv);	
+					}
+				}
+			}
 		}
 		free(entry);
-	/*}*/
+	}
 	return (true);
 }
 
