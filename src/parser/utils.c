@@ -12,6 +12,9 @@
 
 #include <minishell.h>
 
+/*
+ * This function trim spaces like his name inicates
+ */
 int	trim_spaces(char *entry, int *cur)
 {
 	while (entry[*cur] && is_space(entry[*cur]))
@@ -21,6 +24,9 @@ int	trim_spaces(char *entry, int *cur)
 	return (0);
 }
 
+/*
+ * This function calculate the length of a token text
+ */
 int	calc_text_token_len(char *entry, int i)
 {
 	int	len;
@@ -34,6 +40,10 @@ int	calc_text_token_len(char *entry, int i)
 	return (len);
 }
 
+/*
+ * This function calculate the text inside quotes length
+ * (quotes included)
+ */
 int	calc_text_in_quote_len(char *entry, int i, char quote)
 {
 	int	len;
@@ -48,6 +58,9 @@ int	calc_text_in_quote_len(char *entry, int i, char quote)
 	return (len + 2);
 }
 
+/*
+ * This function calculate the length of env variable
+ */
 int	calc_env_len(char *text, int start)
 {
 	int	len;
@@ -61,6 +74,10 @@ int	calc_env_len(char *text, int start)
 	return (len);
 }
 
+/*
+ * This function the length of a text inside ""
+ * if we extend all the env variables
+ */
 int	count_text_size(char *text)
 {
 	int		i;

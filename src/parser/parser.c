@@ -111,7 +111,6 @@ t_token	*find_next_ast_node(t_token *last)
 	return (last);
 }
 
-// TODO: implement this
 t_token	*find_next_ast_node_with_pipe(t_token *last)
 {
 	t_token	*tmp;

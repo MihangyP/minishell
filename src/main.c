@@ -156,10 +156,10 @@ bool	repl(char **env, char *path)
 	builtins = malloc(8 * sizeof(char *));
 	if (!builtins)
 		return (NULL);
-	if (!insert_builtins(builtins))	
-		return (NULL);
-	while (1)
-	{
+	/*if (!insert_builtins(builtins))	*/
+		/*return (NULL);*/
+	/*while (1)*/
+	/*{*/
 		entry = readline("minishell> ");
 		if (entry == NULL)
 			return (false);
@@ -170,38 +170,39 @@ bool	repl(char **env, char *path)
 			token_root = lexer(entry);
 			if (token_root == NULL)
 				return (free(entry), false);
-			ast_root = parse(token_root);
-			if (ast_root == NULL)
-				return (free(entry), false);
-			t_verif	*verify = validate(token_root, path, builtins);
-			if (verify == NULL)
-				return (false);
-			if (!verify->res)
-				printf("command '%s' not found\n", verify->name);
-			else
-			{
-				// TODO: exec builtins functions
-				if (!ast_root->left && !ast_root->right)
-				{
-					if (inside_builtins(ast_root->text, builtins))
-					{
-						if (!ft_strncmp(ast_root->text, "echo", 69))
-							echo_minishell(ast_root->argv);
-						else if (!ft_strncmp(ast_root->text, "env", 69))
-						{
-							if (ast_root->argv)
-								printf("usage: env\n");
-							else
-								env_minishell(env);
-						}
-						else if (!ft_strncmp(ast_root->text, "export", 69))
-							export_minishell(env, ast_root->argv);	
-					}
-				}
-			}
+			print_tokens(token_root);
+			/*ast_root = parse(token_root);*/
+			/*if (ast_root == NULL)*/
+				/*return (free(entry), false);*/
+			/*t_verif	*verify = validate(token_root, path, builtins);*/
+			/*if (verify == NULL)*/
+				/*return (false);*/
+			/*if (!verify->res)*/
+				/*printf("command '%s' not found\n", verify->name);*/
+			/*else*/
+			/*{*/
+				/*// TODO: exec builtins functions*/
+				/*if (!ast_root->left && !ast_root->right)*/
+				/*{*/
+					/*if (inside_builtins(ast_root->text, builtins))*/
+					/*{*/
+						/*if (!ft_strncmp(ast_root->text, "echo", 69))*/
+							/*echo_minishell(ast_root->argv);*/
+						/*else if (!ft_strncmp(ast_root->text, "env", 69))*/
+						/*{*/
+							/*if (ast_root->argv)*/
+								/*printf("usage: env\n");*/
+							/*else*/
+								/*env_minishell(env);*/
+						/*}*/
+						/*else if (!ft_strncmp(ast_root->text, "export", 69))*/
+							/*export_minishell(env, ast_root->argv);	*/
+					/*}*/
+				/*}*/
+			/*}*/
 		}
 		free(entry);
-	}
+	/*}*/
 	return (true);
 }
 
@@ -214,6 +215,14 @@ char	*get_path(char **env)
 		++i;
 	return (env[i] + 5);
 }
+
+// TODO
+// Rethink our approach
+//
+// Our approach
+// - BUILD a TOKENIZER (TODO: improve and refactor)
+// - BUILD a AST
+// - EXEC BY TRAVERSING THE AST
 
 int	main(int ac, char **av, char **env)
 {

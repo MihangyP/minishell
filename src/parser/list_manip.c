@@ -12,6 +12,9 @@
 
 #include <minishell.h>
 
+/*
+ * This function create a new token
+ */
 t_token	*new_token(char *text, t_identifier identifier)
 {
 	t_token	*new;
@@ -26,6 +29,9 @@ t_token	*new_token(char *text, t_identifier identifier)
 	return (new);
 }
 
+/*
+ * This function find the last element in a linked list
+ */
 t_token	*tokens_find_last(t_token *root)
 {
 	t_token	*curr;
@@ -36,6 +42,9 @@ t_token	*tokens_find_last(t_token *root)
 	return (curr);
 }
 
+/*
+ * This function append back a element in a linked list
+ */
 void	tokens_append(t_token **root, t_token *new_el)
 {
 	t_token	*last;
@@ -50,6 +59,9 @@ void	tokens_append(t_token **root, t_token *new_el)
 	new_el->prev = last;
 }
 
+/*
+ * This function calculate the length of a list
+ */
 size_t	list_size(t_token *token)
 {
 	size_t	size;
