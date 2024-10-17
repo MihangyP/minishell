@@ -6,7 +6,7 @@
 /*   By: pmihangy <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/07 12:13:11 by pmihangy          #+#    #+#             */
-/*   Updated: 2024/10/15 12:22:20 by pmihangy         ###   ########.fr       */
+/*   Updated: 2024/10/17 13:52:59 by pmihangy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,6 @@ bool	repl(char **env, char *path)
 			token_root = lexer(entry);
 			if (token_root == NULL)
 				return (free(entry), false);
-			print_tokens(token_root);
 			ast_root = parse(token_root);
 			if (ast_root == NULL)
 				return (free(entry), false);

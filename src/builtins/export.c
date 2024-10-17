@@ -6,12 +6,11 @@
 /*   By: pmihangy <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/07 10:57:28 by pmihangy          #+#    #+#             */
-/*   Updated: 2024/10/15 14:11:20 by pmihangy         ###   ########.fr       */
+/*   Updated: 2024/10/17 14:47:26 by pmihangy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <minishell.h>
-
 
 /*
  		MANUEL
@@ -46,69 +45,139 @@ IMPLEMENTATION
     License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
 
 */
+/* Voici les principaux cas où la commande `export` avec un paramètre est considérée comme invalide :
 
-/*
-La commande `export` dans les systèmes UNIX est utilisée pour ajouter ou modifier des variables d'environnement. Ces variables d'environnement sont ensuite accessibles à tous les processus fils créés par le shell.
+1. **Nom de variable invalide** :
+   - Le nom de la variable doit respecter certaines règles : il doit commencer par une lettre (ou un underscore `_`) et ne peut contenir que des lettres, chiffres ou underscores.
+   - **Exemples** :
+     - `export 1VAR=VALUE` : invalide (le nom commence par un chiffre).
+     - `export VAR@NAME=VALUE` : invalide (le nom contient un caractère spécial).
 
-Voici un aperçu détaillé de la gestion des cas que tu devras prendre en compte pour implémenter cette commande en C, avec des exemples spécifiques comme ceux que tu as fournis :
+2. **Caractères non autorisés dans le nom de la variable** :
+   - Si le nom de la variable contient des caractères spéciaux comme `!`, `@`, `$`, `%`, etc., cela rend la commande invalide.
+   - **Exemples** :
+     - `export VAR!NAME=VALUE` : invalide.
+     - `export V$AR=VALUE` : invalide.
 
-1. **`export DONTO`**  
-   - **Action** : Ici, on essaie d'exporter la variable `DONTO`, mais elle n’a pas de valeur assignée. Le comportement typique dans le shell est de simplement ajouter `DONTO` aux variables d'environnement sans valeur.
-   - **À gérer** : Ajouter `DONTO` à l'environnement si elle n'existe pas déjà, mais sans valeur associée.
+3. **Guillemets mal formés** :
+   - Si des guillemets sont utilisés, ils doivent être correctement ouverts et fermés. Si ce n'est pas le cas, une erreur de syntaxe se produit.
+   - **Exemples** :
+     - `export "VAR=VALUE` : invalide (guillemet ouvrant sans guillemet fermant).
+     - `export VAR="VALUE` : invalide (guillemet fermant manquant pour la valeur).
 
-2. **`export "'DONTO'"`**  
-   - **Action** : Ici, le nom de la variable est invalide à cause des guillemets simples autour de `DONTO`.
-   - **À gérer** : Afficher un message d'erreur. Le nom de la variable d'environnement doit être une chaîne sans caractères spéciaux comme des guillemets.
+4. **Tentative d’exportation de chaînes de caractères avec guillemets** :
+   - Exporter un nom de variable entouré de guillemets simples ou doubles rend la commande invalide, car le shell ne reconnaît pas le nom de la variable avec ces guillemets.
+   - **Exemples** :
+     - `export "VAR"` : invalide (les guillemets autour de `VAR` sont interprétés comme un nom de variable littéral).
+     - `export 'VAR'=VALUE` : invalide (guillemets simples autour du nom de la variable).
 
-3. **`export "'DONTO'"=DONTO`**  
-   - **Action** : Le nom de la variable est entouré de guillemets simples, ce qui est également invalide.
-   - **À gérer** : Afficher un message d'erreur similaire à celui ci-dessus, car le nom de la variable contient des guillemets.
+5. **Mauvaise syntaxe avec des symboles `=`** :
+   - Si le symbole `=` est mal positionné ou utilisé incorrectement, la commande est invalide.
+   - **Exemples** :
+     - `export =VALUE` : invalide (il manque le nom de la variable avant le `=`).
+     - `export VAR==VALUE` : invalide (deux symboles `=` dans la même commande).
 
-4. **`export DONTO=DONTO`**  
-   - **Action** : Ici, on assigne la valeur `DONTO` à la variable `DONTO`. Le comportement attendu est d'ajouter `DONTO` à l'environnement avec la valeur `DONTO`.
-   - **À gérer** : Insérer `DONTO=DONTO` dans les variables d'environnement.
+6. **Espaces mal gérés autour du signe `=`** :
+   - Les espaces entre le nom de la variable et le signe `=` peuvent causer des erreurs, car le shell les interprète comme des séparateurs.
+   - **Exemples** :
+     - `export VAR = VALUE` : invalide (il ne doit pas y avoir d'espace autour du `=`).
 
-5. **`export "DONTO"=DONTO`**  
-   - **Action** : Même si le nom `DONTO` est entouré de guillemets doubles, cela reste valide, car les guillemets sont utilisés pour protéger les espaces ou caractères spéciaux. Le nom de la variable ici est toujours `DONTO`.
-   - **À gérer** : Ajouter `DONTO=DONTO` dans l'environnement.
+7. **Tentative d’exporter des expressions invalides** :
+   - Si une expression est fournie, mais qu'elle ne respecte pas les règles du shell, elle est considérée comme invalide.
+   - **Exemple** :
+     - `export VAR+VALUE` : invalide (le `+` n'est pas une syntaxe supportée pour l'export).
 
-6. **`export "DONTO=DONTO`**  
-   - **Action** : Il y a une erreur de syntaxe ici, car il manque la fermeture du guillemet. Cela devrait être considéré comme une erreur.
-   - **À gérer** : Afficher un message d'erreur de syntaxe.
-
-7. **`export DONTO="DONTO"`**  
-   - **Action** : Ici, on assigne la valeur `DONTO` à la variable `DONTO`, mais la valeur est entourée de guillemets doubles, ce qui est valide.
-   - **À gérer** : Ajouter `DONTO=DONTO` dans l'environnement.
-
-8. **`export DONTO="'DONTO'"`**  
-   - **Action** : Dans ce cas, on assigne la valeur `'DONTO'` (avec les guillemets simples) à la variable `DONTO`. C'est valide.
-   - **À gérer** : Ajouter `DONTO='DONTO'` dans l'environnement.
-
-### Cas supplémentaires à gérer :
-
-- **`export` sans argument** : Affiche la liste des variables d'environnement.
-- **`export var+=value`** : Certains shells supportent l'addition à la valeur existante d'une variable (non standard, mais utile à considérer).
-- **Noms de variables invalides** : Les noms de variables ne peuvent pas commencer par un chiffre, contenir des caractères spéciaux, etc. Gérer cela avec un message d'erreur.
-
-### Implémentation en C
-
-Ton programme devra :
-1. Vérifier la validité des noms de variables (alphanumériques, pas de caractères spéciaux).
-2. Gérer les erreurs de syntaxe (comme les guillemets non fermés).
-3. Mettre à jour l'environnement en utilisant une fonction comme `setenv()` ou `putenv()` pour ajouter ou modifier les variables.
-
-Cela t'aidera à couvrir les différents cas comme demandé.
-*/
-
-/*
- * STEPS:
- * 	1 - manage errors
- * 	2 - if the argument is valid:
- * 		- if the variable already exist, we update his value
- * 		- else we create a new variable at the end
- 
- *
+En résumé, une commande `export` est invalide dans les cas suivants : nom de variable incorrect, guillemets mal formés, mauvaise utilisation du signe `=`, ou syntaxe invalide dans l’expression fournie. Le shell attend des noms de variables corrects et des valeurs bien formatées.
  */
+
+/*
+Voici les différents cas où la valeur d'une variable dans la commande `export` est considérée comme invalide :
+
+---
+
+### 1. **Guillemets mal formés dans la valeur** :
+
+Si des guillemets sont utilisés dans la valeur mais ne sont pas correctement ouverts ou fermés, cela entraîne une erreur de syntaxe.
+
+**Exemples** :
+- `export VAR="VALUE` : invalide (le guillemet ouvrant n'est pas fermé).
+- `export VAR=VALUE"` : invalide (le guillemet fermant apparaît sans guillemet ouvrant).
+- `export VAR='VALUE"` : invalide (mélange de guillemets simples et doubles).
+
+---
+
+### 2. **Utilisation non échappée de caractères spéciaux dans la valeur** :
+
+Les caractères spéciaux comme `$`, `\`, `!`, et d'autres doivent être correctement échappés s'ils sont utilisés dans la valeur. Sinon, ils provoquent des erreurs ou des comportements inattendus.
+
+**Exemples** :
+- `export VAR="Hello$World"` : invalide (le symbole `$` est interprété comme une expansion de variable).
+- `export VAR="Hello\World"` : invalide (le symbole `\` n'est pas échappé correctement).
+
+---
+
+### 3. **Valeur avec des guillemets mal équilibrés** :
+
+Si des guillemets apparaissent au sein de la valeur mais ne sont pas équilibrés (ou mal échappés), cela provoque une erreur.
+
+**Exemples** :
+- `export VAR="He said "Hello"` : invalide (guillemets internes non échappés correctement).
+- `export VAR='He said "Hello'` : invalide (guillemets simples et doubles mal assortis dans la valeur).
+
+---
+
+### 4. **Valeur incomplète ou sans valeur attribuée** :
+
+Une valeur assignée doit être correctement complétée après le signe `=`. Si la valeur est partiellement assignée ou totalement manquante, c'est invalide.
+
+**Exemples** :
+- `export VAR=` : invalide (pas de valeur assignée après le `=`).
+- `export VAR= ` : invalide (espace vide après le `=` sans valeur réelle).
+
+---
+
+### 5. **Caractères non imprimables ou non autorisés** :
+
+La valeur ne doit pas contenir de caractères non imprimables ou non autorisés, tels que des retours à la ligne, des tabulations non échappées, ou d'autres caractères de contrôle.
+
+**Exemples** :
+- `export VAR="Hello\nWorld"` : invalide (saut de ligne non échappé dans la valeur).
+- `export VAR="Hello\tWorld"` : invalide (tabulation non échappée).
+
+---
+
+### 6. **Utilisation non échappée des apostrophes ou doubles apostrophes dans la valeur** :
+
+Si des apostrophes simples ou doubles sont utilisées dans la valeur sans être correctement échappées, cela peut provoquer des erreurs de syntaxe.
+
+**Exemples** :
+- `export VAR="It's fine"` : invalide (l'apostrophe dans `It's` n'est pas échappée).
+- `export VAR='"Hello"'` : invalide (les guillemets doubles ne sont pas échappés correctement dans la valeur).
+
+---
+
+### 7. **Valeur contenant des commandes shell non intentionnelles** :
+
+Si une commande shell est incluse dans la valeur sans être protégée (par exemple avec des guillemets simples ou un échappement), le shell peut tenter de l'exécuter au lieu de l’interpréter comme une chaîne.
+
+**Exemples** :
+- `export VAR=$(rm -rf /)` : invalide (interprétation de la commande `rm -rf /` au lieu d'être une simple chaîne).
+- `export VAR=`expr 1 + 1`` : invalide (la commande `expr` sera exécutée, causant une erreur si non voulu).
+
+---
+
+### 8. **Espaces mal protégés dans la valeur** :
+
+Si des espaces sont utilisés dans la valeur sans être entourés de guillemets ou échappés, cela est considéré comme une erreur de syntaxe.
+
+**Exemples** :
+- `export VAR=Hello World` : invalide (les espaces dans `Hello World` ne sont pas protégés par des guillemets).
+- `export VAR=Hello\ World` : invalide (le caractère d'échappement `\` est mal utilisé pour les espaces).
+
+---
+
+Ces cas couvrent les principales situations où la valeur d'une variable dans une commande `export` est considérée comme invalide. Ils englobent des erreurs de syntaxe liées aux guillemets, caractères spéciaux, espaces non protégés et commandes shell non intentionnelles.
+*/
 
 bool	has_equal(char *str)
 {
@@ -138,20 +207,35 @@ bool	has_quote(char *str)
 	return (false);
 }
 
-bool	is_surround_by_quotes(char *str)
+void	print_error(char *error_mess)
 {
-	int		i;
-	char	quote;
+	printf("ERROR: %s\n", error_mess);
+}
 
-	i = ft_strlen(str) - 2;
-	printf("0: %c\n", str[0]);
-	printf("l: %c\n", str[i]);
-	/*if (str[0] == '\'' || str[0] == '\"')*/
-	/*{*/
-		/*quote = str[0];*/
-		/*if (str[j] == quote)*/
-			/*return (true);*/
-	/*}*/
+bool	has_error(char *str)
+{
+	int	i;
+
+	if (str[0] != '_' && !ft_isalpha(str[0]))
+	{
+		print_error("variable name should start with a letter or _");
+		return (true);
+	}
+	i = 0;
+	while (str[i] != '=')
+	{
+		if (str[i] != '_' && !ft_isalnum(str[i]))
+		{
+			print_error("variable name should only contains letters, digits or _");	
+			return (true);
+		}
+		++i;
+	}
+	if (str[++i] == '=')
+	{
+		print_error("two successive equals");
+		return (true);
+	}
 	return (false);
 }
 
@@ -165,32 +249,16 @@ bool	export_minishell(char **env, char **to_export)
 		env_minishell(env);
 		return (true);
 	}
-	// TODO:  manage errors
 	i = 0;
 	while (to_export[i])
 	{
-		/*if (has_open_quote(to_export[i], false, 0))*/
-			/*printf("open quote\n");*/
-		/*if (!has_equal(to_export[i]))*/
-		/*{*/
-			/*if (has_quote(to_export[i]))*/
-			/*{*/
-				/*if (is_surround_by_quotes(to_export[i]))*/
-				/*{*/
-					/*printf("is surrounded\n");*/
-					/*[>str = trim_str(to_export[i]);<]*/
-					/*[>if (str == NULL)<]*/
-						/*[>return (false);<]*/
-					/*[>if (!validate(str))<]*/
-						/*[>printf("%s is not valid\n", str);<]*/
-				/*}*/
-			/*}*/
-		/*}*/
-		/*else*/
-		/*{*/
-			/*// TODO: do the same thing	*/
-		/*}*/
-		printf("%s\n", to_export[i]);
+		if (has_equal(to_export[i]))
+		{
+			if (!has_error(to_export[i]))
+			{
+				printf("Do something\n");
+			}
+		}
 		++i;
 	}
 	return (true);
