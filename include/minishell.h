@@ -77,6 +77,11 @@ bool	has_open_quote(char *entry, bool found_peer, int i);
 /* utils */
 bool	is_space(char c);
 void	print_tokens(t_token *root);
+void	print_ast(t_ast *ast, int indent);
+t_verif	*validate(t_token *token_root, char *path, char **builtins);
+char	*get_path(char **env);
+bool	insert_builtins(char **builtins);
+bool	inside_builtins(char *cmd, char **builtins);
 
 /* parser */
 

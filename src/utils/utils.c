@@ -28,3 +28,37 @@ void	print_tokens(t_token *root)
 		curr = curr->next;
 	}
 }
+
+void	print_ast(t_ast *ast, int indent)
+{
+	int	i;
+
+	i = 0;
+	if (!ast)
+		return ;
+	while (i < indent)
+	{
+		printf("	");
+		i++;
+	}
+	printf("%s ", ast->text);
+	if (ast->argv)
+	{
+		for (int i = 0; ast->argv[i] != NULL; ++i)
+			printf("%s ", ast->argv[i]);
+	}
+	printf("\n");
+	print_ast(ast->left, indent + 1);
+	print_ast(ast->right, indent + 1);
+}
+
+char	*get_path(char **env)
+{
+	int	i;
+
+	i = 0;
+	while (ft_strncmp(env[i], "PATH", 4))
+		++i;
+	return (env[i] + 5);
+}
+
