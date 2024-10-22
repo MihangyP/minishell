@@ -1,30 +1,23 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_memcpy.c                                        :+:      :+:    :+:   */
+/*   exit.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: pmihangy <pmihangy@student.42antanana      +#+  +:+       +#+        */
+/*   By: irazafim <irazafim@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/02/19 13:14:12 by pmihangy          #+#    #+#             */
-/*   Updated: 2024/10/19 11:15:18 by pmihangy         ###   ########.fr       */
+/*   Created: 2024/09/21 07:35:40 by irazafim          #+#    #+#             */
+/*   Updated: 2024/10/22 09:36:57 by pmihangy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft.h"
+#include <minishell.h>
 
-void	*ft_memcpy(void *dest, const void *src, size_t n)
+void    exit_minishell(char **argv)
 {
-	size_t			i;
+	int exit_code;
 
-	i = 0;
-	if (!dest && !src)
-		return (NULL);
-	while (i < n)
-	{
-		*(unsigned char *)dest = *(unsigned char *)src;
-		dest++;
-		src++;
-		i++;
-	}
-	return (dest - n);
+	exit_code = 0;
+	if (argv != NULL && argv[1] != NULL)
+		exit_code = ft_atoi(argv[1]);
+	exit(exit_code);
 }

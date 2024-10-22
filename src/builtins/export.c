@@ -6,7 +6,7 @@
 /*   By: pmihangy <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/07 10:57:28 by pmihangy          #+#    #+#             */
-/*   Updated: 2024/10/17 14:47:26 by pmihangy         ###   ########.fr       */
+/*   Updated: 2024/10/22 10:04:33 by pmihangy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -239,14 +239,102 @@ bool	has_error(char *str)
 	return (false);
 }
 
-bool	export_minishell(char **env, char **to_export)
+char	*get_variable_name(char *str)
+{
+	char	*name;
+	int		i;
+
+	i = 0;
+	while (str[i] != '=')
+		++i;
+	name = malloc((i + 1) * sizeof(char));
+	IF_RETURN(!name, NULL)
+	ft_memcpy(name, str, i);
+	name[++i] = '\0';
+	return (name);
+}
+
+int	is_already_exist(char *name, char **env)
 {
 	int		i;
-	char	*str;
+	char	*key;
+
+	i  = 0;
+	while (env[i])
+	{
+		key = get_variable_name(env[i]);
+		IF_RETURN(!key, -1)
+		IF_RETURN(!ft_strncmp(name, key, 69), 1)
+		++i;
+	}
+	return (0);
+}
+
+bool	env_append(char ***env, char *str)
+{
+	size_t	size;
+	char	**new_env;
+
+	size = 0;
+	while ((*env)[size])
+		++size;
+	new_env = malloc((size + 2) * sizeof(char *));
+	IF_RETURN(!new_env, false)
+	size = 0;
+	while ((*env)[size])
+	{
+		new_env[size] = ft_strdup((*env)[size]);
+		IF_RETURN(!new_env[size], false)
+		++size;
+	}
+	new_env[size] = ft_strdup(str);
+	IF_RETURN(!new_env[size], false)
+	new_env[++size] = NULL;
+	*env = new_env;
+	return (true);
+}
+
+bool	env_update(char ***env, char *str)
+{
+	int		i;
+	char	*name;
+	char	**new_env;
+
+	i = 0;
+	while ((*env)[i])
+		++i;
+	new_env = malloc((i + 1) * sizeof(char *));
+	IF_RETURN(!new_env, false)
+	i = 0;
+	while ((*env)[i])
+	{
+		name = get_variable_name((*env)[i]);
+		IF_RETURN(!name, false)
+		if (!ft_strncmp(name, get_variable_name(str), 69))
+		{
+			new_env[i] = ft_strdup(str);
+			IF_RETURN(!new_env[i], false)
+		}
+		else
+		{
+			new_env[i] = ft_strdup((*env)[i]);
+			IF_RETURN(!new_env[i], false)
+		}
+		++i;
+	}
+	new_env[i] = NULL;
+	*env = new_env;
+	return (true);
+}
+
+bool	export_minishell(char ***env, char **to_export)
+{
+	int		i;
+	char	*variable_name;
 
 	if (!to_export)
 	{
-		env_minishell(env);
+		env_minishell(*env);
 		return (true);
 	}
 	i = 0;
@@ -256,7 +344,14 @@ bool	export_minishell(char **env, char **to_export)
 		{
 			if (!has_error(to_export[i]))
 			{
-				printf("Do something\n");
+				variable_name = get_variable_name(to_export[i]);
+				IF_RETURN(!variable_name, false)
+				if (is_already_exist(variable_name, *env) == 1)
+					env_update(env, to_export[i]);
+				else if (is_already_exist(variable_name, *env) == -1)
+					return (false);
+				else
+					env_append(env, to_export[i]);
 			}
 		}
 		++i;

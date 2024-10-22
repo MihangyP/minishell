@@ -6,7 +6,7 @@
 /*   By: pmihangy <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/07 12:13:57 by pmihangy          #+#    #+#             */
-/*   Updated: 2024/10/17 13:33:45 by pmihangy         ###   ########.fr       */
+/*   Updated: 2024/10/22 11:42:48 by pmihangy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,9 @@
 # include <readline/readline.h>
 # include <readline/history.h>
 # include <sys/types.h>
+# include <sys/wait.h>
 # include <dirent.h>
+# include <errno.h>
 # include <libft.h>
 
 /* Macros */
@@ -81,7 +83,7 @@ void	print_ast(t_ast *ast, int indent);
 t_verif	*validate(t_token *token_root, char *path, char **builtins);
 char	*get_path(char **env);
 bool	insert_builtins(char **builtins);
-bool	inside_builtins(char *cmd, char **builtins);
+bool	is_in(char *needle, char **haystack);
 
 /* parser */
 
@@ -103,10 +105,17 @@ int		calc_text_token_len(char *entry, int i);
 int		calc_text_in_quote_len(char *entry, int i, char quote);
 int		calc_env_len(char *text, int start);
 int		count_text_size(char *text);
+char	*get_variable_name(char *str);
+bool	env_update(char ***env, char *str);
+bool	verif_inside(char *directory, char *cmd);
 
 /* builtins */
 void	echo_minishell(char **argv);
 void	env_minishell(char **env);
-bool	export_minishell(char **env, char **to_export);
+bool	export_minishell(char ***env, char **to_export);
+bool	unset_minishell(char ***env, char **to_unset);	
+void	pwd_minishell(void);
+int		cd_minishell(char *argv[], char ***env);
+void	exit_minishell(char **argv);
 
 #endif

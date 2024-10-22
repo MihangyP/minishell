@@ -1,30 +1,21 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_memcpy.c                                        :+:      :+:    :+:   */
+/*   pwd.c                                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: pmihangy <pmihangy@student.42antanana      +#+  +:+       +#+        */
+/*   By: irazafim <irazafim@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/02/19 13:14:12 by pmihangy          #+#    #+#             */
-/*   Updated: 2024/10/19 11:15:18 by pmihangy         ###   ########.fr       */
+/*   Created: 2024/09/19 09:22:15 by irazafim          #+#    #+#             */
+/*   Updated: 2024/10/22 09:45:31 by pmihangy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft.h"
+#include <minishell.h>
 
-void	*ft_memcpy(void *dest, const void *src, size_t n)
+void pwd_minishell (void)
 {
-	size_t			i;
+	char cwd[1024];
 
-	i = 0;
-	if (!dest && !src)
-		return (NULL);
-	while (i < n)
-	{
-		*(unsigned char *)dest = *(unsigned char *)src;
-		dest++;
-		src++;
-		i++;
-	}
-	return (dest - n);
+	getcwd(cwd, sizeof(cwd));
+	printf("%s\n", cwd);
 }

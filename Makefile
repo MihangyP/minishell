@@ -6,7 +6,7 @@
 #    By: pmihangy <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/09/07 12:06:42 by pmihangy          #+#    #+#              #
-#    Updated: 2024/10/07 11:46:21 by pmihangy         ###   ########.fr        #
+#    Updated: 2024/10/22 09:39:49 by pmihangy         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -21,7 +21,7 @@ PARSER_FILES += $(addprefix lexer/, $(LEXER_FILES))
 PARSER_FILES += $(addprefix ast_builder/, $(AST_BUILDER_FILES))
 UTILS_FILES = error.c utils.c verif_if_cmd_exist.c
 EXECUTION_FILES =  ## TODO
-BUILTINS_FILES = echo.c env.c export.c
+BUILTINS_FILES = echo.c env.c export.c unset.c exit.c pwd.c cd.c
 SRC_FILES += $(addprefix src/utils/, $(UTILS_FILES))
 SRC_FILES += $(addprefix src/parser/, $(PARSER_FILES))
 SRC_FILES += $(addprefix src/execution/, $(EXECUTION_FILES))

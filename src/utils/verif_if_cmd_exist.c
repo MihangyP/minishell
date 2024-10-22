@@ -37,10 +37,58 @@ bool	verif_inside(char *directory, char *cmd)
 	return (false);
 }
 
+bool	is_valide_path(char *cmd, char *path)
+{
+	char	**arr;
+	int		i;
+	int		j;
+	int		counter;
+	int		len;
+	
+	arr = ft_split(path, ':');
+	IF_RETURN(!arr, false)
+	j = ft_strlen(cmd) - 1;
+	counter = 0;
+	while (cmd[j] != '/')
+	{
+		++counter;
+		--j;	
+	}
+	++counter;
+	len = ft_strlen(cmd) - counter;
+	if (len == 0)
+		return (false);
+	i = 0;
+	while (arr[i])
+	{
+		if (!ft_strncmp(cmd, arr[i], len))
+			return (true);
+		++i;
+	}
+	return (false);
+}
+
+bool	verif_if_absolute_path(char *directory, char *path, char *cmd)
+{
+	char	**arr;
+	int		i;
+
+	if (is_valide_path(cmd, path))
+	{
+		arr = ft_split(cmd, '/');
+		IF_RETURN(!arr, false)
+			i = 0;
+		while (arr[i + 1] != NULL)
+			++i;
+		if (verif_inside(directory, arr[i]))
+			return (true);
+	}
+	return (false);
+}
+
 size_t	verify_if_in_path(char *cmd, char *path)
 {
 	char	**bins_dir;
-	char		**tmp;
 	int			i;
 
 	bins_dir = ft_split(path, ':');
@@ -48,20 +96,23 @@ size_t	verify_if_in_path(char *cmd, char *path)
 	i = 0;
 	while (bins_dir[i])
 	{
-		IF_RETURN(verif_inside(bins_dir[i], cmd), 1)
+		if (verif_inside(bins_dir[i], cmd))
+			return (1);
+		else if (verif_if_absolute_path(bins_dir[i], path, cmd))
+			return (1);
 		++i;
 	}
 	return (0);
 }
 
-bool	inside_builtins(char *cmd, char **builtins)
+bool	is_in(char *needle, char **haystack)
 {
 	int	i;
 
 	i = 0;
-	while (builtins[i])
+	while (haystack[i])
 	{
-		IF_RETURN(!ft_strncmp(cmd, builtins[i], 69), true)
+		IF_RETURN(!ft_strncmp(needle, haystack[i], 69), true)
 		++i;
 	}
 	return (false);
@@ -79,7 +130,7 @@ t_verif	*validate(t_token *token_root, char *path, char **builtins)
 	{
 		if (token_root->identifier == CMD)
 		{
-			if (!inside_builtins(token_root->text, builtins))
+			if (!is_in(token_root->text, builtins))
 			{
 				if (!verify_if_in_path(token_root->text, path))
 				{
