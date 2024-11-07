@@ -6,7 +6,7 @@
 #    By: pmihangy <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/09/07 12:06:42 by pmihangy          #+#    #+#              #
-#    Updated: 2024/10/22 09:39:49 by pmihangy         ###   ########.fr        #
+#    Updated: 2024/11/07 14:38:23 by pmihangy         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -49,5 +49,8 @@ fclean: clean
 	$(RM) $(NAME)
 
 re: fclean all
+
+valgrind:
+	valgrind --leak-check=full --show-leak-kinds=all --suppressions=readline.donto ./$(NAME)
 
 .PHONY: all clean fclean re

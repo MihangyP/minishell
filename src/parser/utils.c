@@ -6,7 +6,7 @@
 /*   By: pmihangy <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 10:51:03 by pmihangy          #+#    #+#             */
-/*   Updated: 2024/09/18 13:34:57 by pmihangy         ###   ########.fr       */
+/*   Updated: 2024/11/07 11:47:23 by pmihangy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,8 @@ int	trim_spaces(char *entry, int *cur)
 {
 	while (entry[*cur] && is_space(entry[*cur]))
 		(*cur)++;
-	IF_RETURN(entry[*cur] == '\0', 2)
+	if (entry[*cur] == '\0')
+		return (2);
 	return (0);
 }
 

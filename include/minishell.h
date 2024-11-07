@@ -6,7 +6,7 @@
 /*   By: pmihangy <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/07 12:13:57 by pmihangy          #+#    #+#             */
-/*   Updated: 2024/10/22 11:42:48 by pmihangy         ###   ########.fr       */
+/*   Updated: 2024/11/07 17:05:08 by pmihangy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,10 +27,6 @@
 # include <dirent.h>
 # include <errno.h>
 # include <libft.h>
-
-/* Macros */
-
-# define IF_RETURN(condition, value) if (condition) return (value);
 
 /* structures and enums */
 
@@ -84,10 +80,11 @@ t_verif	*validate(t_token *token_root, char *path, char **builtins);
 char	*get_path(char **env);
 bool	insert_builtins(char **builtins);
 bool	is_in(char *needle, char **haystack);
+char	*get_dir_path(char *cmd, char *path);
 
 /* parser */
 
-t_token	*lexer(char *entry);
+void	lexer(t_token **token_root, char *entry);
 t_ast	*parse(t_token *token_root);
 bool	insert_argument_token(char *entry, t_token **root, int *i);
 bool	insert_cmd_token(char *entry, t_token **root, int *i);

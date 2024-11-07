@@ -6,7 +6,7 @@
 /*   By: pmihangy <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/07 10:57:28 by pmihangy          #+#    #+#             */
-/*   Updated: 2024/10/22 10:04:33 by pmihangy         ###   ########.fr       */
+/*   Updated: 2024/11/07 12:33:55 by pmihangy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -248,7 +248,8 @@ char	*get_variable_name(char *str)
 	while (str[i] != '=')
 		++i;
 	name = malloc((i + 1) * sizeof(char));
-	IF_RETURN(!name, NULL)
+	if (!name)
+		return (NULL);
 	ft_memcpy(name, str, i);
 	name[++i] = '\0';
 	return (name);
@@ -263,8 +264,10 @@ int	is_already_exist(char *name, char **env)
 	while (env[i])
 	{
 		key = get_variable_name(env[i]);
-		IF_RETURN(!key, -1)
-		IF_RETURN(!ft_strncmp(name, key, 69), 1)
+		if (!key)
+			return (-1);
+		if (!ft_strncmp(name, key, 69))
+			return (1);
 		++i;
 	}
 	return (0);
@@ -279,16 +282,19 @@ bool	env_append(char ***env, char *str)
 	while ((*env)[size])
 		++size;
 	new_env = malloc((size + 2) * sizeof(char *));
-	IF_RETURN(!new_env, false)
+	if (!new_env)
+		return (false);
 	size = 0;
 	while ((*env)[size])
 	{
 		new_env[size] = ft_strdup((*env)[size]);
-		IF_RETURN(!new_env[size], false)
+		if (!new_env[size])
+			return (false);
 		++size;
 	}
 	new_env[size] = ft_strdup(str);
-	IF_RETURN(!new_env[size], false)
+	if (!new_env[size])
+		return (false);
 	new_env[++size] = NULL;
 	*env = new_env;
 	return (true);
@@ -304,21 +310,25 @@ bool	env_update(char ***env, char *str)
 	while ((*env)[i])
 		++i;
 	new_env = malloc((i + 1) * sizeof(char *));
-	IF_RETURN(!new_env, false)
+	if (!new_env)
+		return (false);
 	i = 0;
 	while ((*env)[i])
 	{
 		name = get_variable_name((*env)[i]);
-		IF_RETURN(!name, false)
+		if (!name)
+			return (false);
 		if (!ft_strncmp(name, get_variable_name(str), 69))
 		{
 			new_env[i] = ft_strdup(str);
-			IF_RETURN(!new_env[i], false)
+			if (!new_env[i])
+				return (false);
 		}
 		else
 		{
 			new_env[i] = ft_strdup((*env)[i]);
-			IF_RETURN(!new_env[i], false)
+			if (!new_env[i])
+				return (false);
 		}
 		++i;
 	}
@@ -345,7 +355,8 @@ bool	export_minishell(char ***env, char **to_export)
 			if (!has_error(to_export[i]))
 			{
 				variable_name = get_variable_name(to_export[i]);
-				IF_RETURN(!variable_name, false)
+				if (!variable_name)
+					return (false);
 				if (is_already_exist(variable_name, *env) == 1)
 					env_update(env, to_export[i]);
 				else if (is_already_exist(variable_name, *env) == -1)

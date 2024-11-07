@@ -6,7 +6,7 @@
 /*   By: pmihangy <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/07 12:31:41 by pmihangy          #+#    #+#             */
-/*   Updated: 2024/09/17 11:53:46 by pmihangy         ###   ########.fr       */
+/*   Updated: 2024/11/07 13:57:17 by pmihangy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,3 +62,20 @@ char	*get_path(char **env)
 	return (env[i] + 5);
 }
 
+char	*get_dir_path(char *cmd, char *path)
+{
+	char	**arr;
+	int		i;
+
+	arr = ft_split(path, ':');
+	if (!arr)
+		return (NULL);
+	i = 0;
+	while (arr[i])
+	{
+		if (verif_inside(arr[i], cmd))
+			return (ft_strjoin(arr[i], "/"));
+		++i;
+	}
+	return (NULL);
+}

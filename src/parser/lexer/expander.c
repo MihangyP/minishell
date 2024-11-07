@@ -31,7 +31,8 @@ char	*extract_text(char *text)
 	int		j;
 
 	s = malloc((count_text_size(text) + 1) * sizeof(char));
-	IF_RETURN(!s, NULL)
+	if (!s)
+		return (NULL);
 	i = 0;
 	j = 0;
 	while (text[i])
@@ -60,7 +61,8 @@ bool	insert_cmd_token(char *entry, t_token **root, int *i)
 
 	token_len = calc_text_token_len(entry, *i);
 	text = ft_substr(entry, *i, token_len);
-	IF_RETURN(!text, false)
+	if (!text)
+		return (false);
 	tokens_append(root, new_token(text, CMD));
 	(*i) += token_len;
 	return (true);
@@ -93,7 +95,8 @@ bool	insert_argument_token(char *entry, t_token **root, int *i)
 		if (text[0] == '$')
 			text = getenv(ft_substr(text, 1, ft_strlen(text) - 1));
 	}
-	IF_RETURN(!text, false)
+	if (!text)
+		return (false);
 	tokens_append(root, new_token(text, ARGUMENT));
 	(*i) += token_len;
 	return (true);

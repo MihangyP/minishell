@@ -3,19 +3,26 @@
 bool	insert_builtins(char **builtins)
 {
 	builtins[0] = ft_strdup("echo");
-	IF_RETURN(!builtins[0], false)
+	if (!builtins[0])
+		return (false);
 	builtins[1] = ft_strdup("cd");
-	IF_RETURN(!builtins[1], false)
+	if (!builtins[1])
+		return (false);
 	builtins[2] = ft_strdup("pwd");
-	IF_RETURN(!builtins[2], false)
+	if (!builtins[2])
+		return (false);
 	builtins[3] = ft_strdup("export");
-	IF_RETURN(!builtins[3], false)
+	if (!builtins[3])
+		return (false);
 	builtins[4] = ft_strdup("unset");
-	IF_RETURN(!builtins[4], false)
+	if (!builtins[4])
+		return (false);
 	builtins[5] = ft_strdup("env");
-	IF_RETURN(!builtins[5], false)
+	if (!builtins[5])
+		return (false);
 	builtins[6] = ft_strdup("exit");
-	IF_RETURN(!builtins[6], false)
+	if (!builtins[6])
+		return (false);
 	builtins[7] = NULL;
 	return (true);
 }
@@ -26,11 +33,13 @@ bool	verif_inside(char *directory, char *cmd)
 	struct dirent	*dirr;
 
 	dirp = opendir(directory);
-	IF_RETURN(!dirp, false)
+	if (!dirp)
+		return (false);
 	dirr = readdir(dirp);
 	while (dirr)
 	{
-		IF_RETURN(!ft_strncmp(cmd, dirr->d_name, 69), true)
+		if (!ft_strncmp(cmd, dirr->d_name, 69))
+			return (true);
 		dirr = readdir(dirp);
 	}
 	closedir(dirp);
@@ -46,7 +55,8 @@ bool	is_valide_path(char *cmd, char *path)
 	int		len;
 	
 	arr = ft_split(path, ':');
-	IF_RETURN(!arr, false)
+	if (!arr)
+		return (false);
 	j = ft_strlen(cmd) - 1;
 	counter = 0;
 	while (cmd[j] != '/')
@@ -76,8 +86,9 @@ bool	verif_if_absolute_path(char *directory, char *path, char *cmd)
 	if (is_valide_path(cmd, path))
 	{
 		arr = ft_split(cmd, '/');
-		IF_RETURN(!arr, false)
-			i = 0;
+		if (!arr)
+			return (false);
+		i = 0;
 		while (arr[i + 1] != NULL)
 			++i;
 		if (verif_inside(directory, arr[i]))
@@ -92,7 +103,8 @@ size_t	verify_if_in_path(char *cmd, char *path)
 	int			i;
 
 	bins_dir = ft_split(path, ':');
-	IF_RETURN(!bins_dir, 2)
+	if (!bins_dir)
+		return (2);
 	i = 0;
 	while (bins_dir[i])
 	{
@@ -112,7 +124,8 @@ bool	is_in(char *needle, char **haystack)
 	i = 0;
 	while (haystack[i])
 	{
-		IF_RETURN(!ft_strncmp(needle, haystack[i], 69), true)
+		if (!ft_strncmp(needle, haystack[i], 69))
+			return (true);
 		++i;
 	}
 	return (false);
@@ -123,7 +136,8 @@ t_verif	*validate(t_token *token_root, char *path, char **builtins)
 	t_verif	*result;
 
 	result = malloc(sizeof(t_verif));
-	IF_RETURN(!result, NULL)
+	if (!result)
+		return (NULL);
 	result->res = true;
 	result->name = NULL;
 	while (token_root)
@@ -136,7 +150,8 @@ t_verif	*validate(t_token *token_root, char *path, char **builtins)
 				{
 					result->res = false;
 					result->name = ft_strdup(token_root->text);
-					IF_RETURN(!result->name, NULL)
+					if (!result->name)
+						return (NULL);
 					return (result);
 				}
 				else if (verify_if_in_path(token_root->text, path) == 2)

@@ -6,7 +6,7 @@
 /*   By: pmihangy <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 10:48:18 by pmihangy          #+#    #+#             */
-/*   Updated: 2024/09/10 10:53:50 by pmihangy         ###   ########.fr       */
+/*   Updated: 2024/11/07 11:48:43 by pmihangy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,8 @@ bool	has_an_env(char *text)
 	i = 0;
 	while (text[i])
 	{
-		IF_RETURN(text[i] == '$', true)
+		if (text[i] == '$')
+			return (true);
 		++i;
 	}
 	return (false);

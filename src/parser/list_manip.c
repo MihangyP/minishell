@@ -6,7 +6,7 @@
 /*   By: pmihangy <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 10:46:41 by pmihangy          #+#    #+#             */
-/*   Updated: 2024/09/17 11:28:24 by pmihangy         ###   ########.fr       */
+/*   Updated: 2024/11/07 11:48:09 by pmihangy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,8 @@ t_token	*new_token(char *text, t_identifier identifier)
 	t_token	*new;
 
 	new = malloc(sizeof(t_token));
-	IF_RETURN(!new, NULL)
+	if (!new)
+		return (NULL);
 	new->text = text;
 	new->identifier = identifier;
 	new->prev = NULL;
@@ -66,7 +67,8 @@ size_t	list_size(t_token *token)
 	size_t	size;
 
 	size = 0;
-	IF_RETURN(!token, 0)
+	if (!token)
+		return (0);
 	while (token)
 	{
 		++size;

@@ -6,7 +6,7 @@
 /*   By: pmihangy <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/20 09:15:59 by pmihangy          #+#    #+#             */
-/*   Updated: 2024/10/07 09:52:17 by pmihangy         ###   ########.fr       */
+/*   Updated: 2024/11/07 12:42:24 by pmihangy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,8 @@ bool	has_operator(t_token *token)
 {
 	while (token)
 	{
-		IF_RETURN(is_operator(token->text[0]), true)
+		if (is_operator(token->text[0]))
+			return (true);
 		token = token->next;
 	}
 	return (false);
@@ -26,7 +27,8 @@ bool	has_operator_with_pipe(t_token *token)
 {
 	while (token && token->identifier != PIPE)
 	{
-		IF_RETURN(is_operator(token->text[0]), true)
+		if (is_operator(token->text[0]))
+			return (true);
 		token = token->next;
 	}
 	return (false);
@@ -39,7 +41,8 @@ t_ast	*create_cmd(t_token *token_root)
 	int	i;
 
 	ast = malloc(sizeof(t_ast));
-	IF_RETURN(!ast, NULL)
+	if (!ast)
+		return (NULL);
 	ast->text = token_root->text;
 	ast->identifier = token_root->identifier;
 	ast->argv = NULL;
@@ -50,13 +53,15 @@ t_ast	*create_cmd(t_token *token_root)
 	if (token_root)
 	{
 		ast->argv = malloc((list_size(token_root) + 1) * sizeof(char *));
-		IF_RETURN(!ast->argv, NULL)
+		if (!ast->argv)
+			return (NULL);
 	}
 	i = 0;
 	while (token_root)
 	{
 		ast->argv[i] = ft_strdup(token_root->text);
-		IF_RETURN(!ast->argv[i], NULL)
+		if (!ast->argv[i])
+			return (NULL);
 		token_root = token_root->next;
 		i++;
 	}
@@ -69,7 +74,8 @@ bool	has_pipe(t_token *t)
 {
 	while (t)
 	{
-		IF_RETURN(t->text[0] == '|', true)
+		if (t->text[0] == '|')
+			return (true);
 		t = t->prev;
 	}
 	return (false);
@@ -80,7 +86,8 @@ t_ast	*new_node(t_token *token)
 	t_ast	*new;
 
 	new = malloc(sizeof(t_ast));
-	IF_RETURN(!new, NULL)
+	if (!new)
+		return (NULL);
 	new->text = token->text;
 	new->identifier = token->identifier;
 	new->argv = NULL;
@@ -99,7 +106,8 @@ t_token	*find_next_ast_node(t_token *last)
 		tmp = last;
 		last = last->prev;
 	}
-	IF_RETURN(!last, tmp)
+	if (!last)
+		return (tmp);
 	return (last);
 }
 
@@ -112,7 +120,8 @@ t_token	*find_next_ast_node_with_pipe(t_token *last)
 		tmp = last;
 		last = last->prev;
 	}
-	IF_RETURN(last->identifier == PIPE || !last, tmp)
+	if (last->identifier == PIPE || !last)
+		return (tmp);
 	return (last);
 }
 
@@ -125,7 +134,8 @@ t_token	*find_next_pipe_or_cmd(t_token *token)
 		tmp = token;
 		token = token->prev;
 	}
-	IF_RETURN(!token, tmp)
+	if (!token)
+		return (tmp);
 	return (token);
 }
 
@@ -144,13 +154,15 @@ char	**insert_argv(t_token *last)
 		curr = curr->next;
 	}
 	argv = malloc((size + 1) * sizeof(char *));
-	IF_RETURN(!argv, NULL)
+	if (!argv)
+		return (NULL);
 	curr = last;
 	i = 0;
 	while (curr && !is_operator(curr->text[0]))
 	{
 		argv[i] = ft_strdup(curr->text);
-		IF_RETURN(!argv[i], NULL)
+		if (!argv[i])
+			return (NULL);
 		++i;
 		curr = curr->next;
 	}
@@ -209,21 +221,26 @@ bool	fill_left(t_ast **ast, t_token *last)
 	{
 		last = find_next_ast_node(last->prev);
 		(*ast)->left = new_node(last);
-		IF_RETURN((*ast)->left == NULL, false)
+		if ((*ast)->left == NULL)
+			return (false);
 		(*ast)->left->parent = malloc(sizeof(t_ast));
-		IF_RETURN((*ast)->left->parent == NULL, false)
+		if ((*ast)->left->parent == NULL)
+			return (false);
 		(*ast)->left->parent = *ast;
 		if ((*ast)->left->identifier == CMD && last->next->identifier == ARGUMENT)
 		{
 			(*ast)->left->argv = insert_argv(last->next);
-			IF_RETURN((*ast)->left->argv == NULL, false)
+			if ((*ast)->left->argv == NULL)
+				return (false);
 		}
 		else if (is_operator(last->text[0]) && !is_operator(last->next->text[0]))
 		{
 			(*ast)->left->right = new_node(last->next); 		
-			IF_RETURN((*ast)->left->right == NULL, false)
+			if ((*ast)->left->right == NULL)
+				return (false);
 			(*ast)->left->right->parent = malloc(sizeof(t_ast));
-			IF_RETURN((*ast)->left->right->parent == NULL, false)
+			if ((*ast)->left->right->parent == NULL)
+				return (false);
 			(*ast)->left->right->parent = (*ast)->left;
 		}
 		ast = &((*ast)->left);
@@ -236,7 +253,8 @@ bool	has_operator_inside_pipe(t_token *token)
 {
 	while (token && token->identifier != PIPE)
 	{
-		IF_RETURN(is_operator(token->text[0]), true)
+		if (is_operator(token->text[0]))
+			return (true);
 		token = token->next;
 	}
 	return (false);
@@ -289,21 +307,26 @@ bool	fill_left_inside(t_ast **ast, t_token *token)
 	{
 		token = find_next_op_inside_pipe(token->prev); 
 		(*ast)->left = new_node(token);
-		IF_RETURN((*ast)->left == NULL, false)
+		if ((*ast)->left == NULL)
+			return (false);
 		(*ast)->left->parent = malloc(sizeof(t_ast));
-		IF_RETURN((*ast)->left->parent == NULL, false)
+		if ((*ast)->left->parent == NULL)
+			return (false);
 		(*ast)->left->parent = *ast;
 		if (token->identifier == CMD && token->next->identifier == ARGUMENT)
 		{
 			(*ast)->left->argv = insert_argv(token);
-			IF_RETURN((*ast)->left->argv == NULL, false)
+			if ((*ast)->left->argv == NULL)
+				return (false);
 		}
 		if (is_operator(token->text[0]))
 		{
 			(*ast)->left->right = new_node(token->next);
-			IF_RETURN((*ast)->left->right == NULL, false)
+			if ((*ast)->left->right == NULL)
+				return (false);
 			(*ast)->left->right->parent = malloc(sizeof(t_ast));
-			IF_RETURN((*ast)->left->right->parent == NULL, false)
+			if ((*ast)->left->right->parent == NULL)
+				return (false);
 			(*ast)->left->right->parent = (*ast)->left;
 		}
 		// TODO: to change
@@ -328,66 +351,84 @@ bool	fill_left_with_pipe_parent(t_ast **ast, t_token *last)
 			if (!has_operator_inside_pipe(last))
 			{
 				(*ast)->left = new_node(last);
-				IF_RETURN((*ast)->left == NULL, false)
+				if ((*ast)->left == NULL)
+					return (false);
 				(*ast)->left->parent = malloc(sizeof(t_ast));
-				IF_RETURN((*ast)->left->parent == NULL, false)
+				if ((*ast)->left->parent == NULL)
+					return (false);
 				(*ast)->left->parent = *ast;
 				if (last->next->identifier == ARGUMENT)
 				{
 					(*ast)->left->argv = insert_argv(last);
-					IF_RETURN((*ast)->left->argv == NULL, false)
+					if ((*ast)->left->argv == NULL)
+						return (false);
 				}
 			}
 			else
 			{
 				last = find_operator_inside_pipe(last);
 				(*ast)->left = new_node(last);
-				IF_RETURN((*ast)->left == NULL, false)
+				if ((*ast)->left == NULL)
+					return (false);
 				(*ast)->left->parent = malloc(sizeof(t_ast));
-				IF_RETURN((*ast)->left->parent == NULL, false)
+				if ((*ast)->left->parent == NULL)
+					return (false);
 				(*ast)->left->parent = *ast;
 				(*ast)->left->right = new_node(last->next);
 				(*ast)->left->right->parent = malloc(sizeof(t_ast));
-				IF_RETURN((*ast)->left->right->parent == NULL, false)
+				if ((*ast)->left->right->parent == NULL)
+					return (false);
 				(*ast)->left->right->parent = (*ast)->left;
-				IF_RETURN((*ast)->left->right == NULL, false)
-				IF_RETURN(!fill_left_inside(&(*ast)->left, last), false)
+				if ((*ast)->left->right == NULL)
+					return (false);
+				if (!fill_left_inside(&(*ast)->left, last))
+					return (false);
 			}
 		}
 		else
 		{
 			(*ast)->left = new_node(last);
-			IF_RETURN((*ast)->left == NULL, false)
+			if ((*ast)->left == NULL)
+				return (false);
 			(*ast)->left->parent = malloc(sizeof(t_ast));
-			IF_RETURN((*ast)->left->parent == NULL, false)
+			if ((*ast)->left->parent == NULL)
+				return (false);
 			(*ast)->left->parent = *ast;
 			if (!has_operator_inside_pipe(last->next))
 			{
 				(*ast)->left->right = new_node(last->next);
-				IF_RETURN((*ast)->left->right == NULL, false)
+				if ((*ast)->left->right == NULL)
+					return (false);
 				(*ast)->left->right->parent = malloc(sizeof(t_ast));
-				IF_RETURN((*ast)->left->right->parent == NULL, false)
+				if ((*ast)->left->right->parent == NULL)
+					return (false);
 				(*ast)->left->right->parent = (*ast)->left;
 				if (last->next->next->identifier == ARGUMENT)
 				{
 					(*ast)->left->right->argv = insert_argv(last->next);
-					IF_RETURN((*ast)->left->right->argv == NULL, false)
+					if ((*ast)->left->right->argv == NULL)
+						return (false);
 				}
 			}
 			else
 			{
 				token = find_operator_inside_pipe(last->next);
 				(*ast)->left->right = new_node(token);
-				IF_RETURN((*ast)->left->right == NULL, false)
+				if ((*ast)->left->right == NULL)
+					return (false);
 				(*ast)->left->right->parent = malloc(sizeof(t_ast));
-				IF_RETURN((*ast)->left->right->parent == NULL, false)
+				if ((*ast)->left->right->parent == NULL)
+					return (false);
 				(*ast)->left->right->parent = (*ast)->left;
 				(*ast)->left->right->right = new_node(token->next);
-				IF_RETURN((*ast)->left->right->right == NULL, false)
+				if ((*ast)->left->right->right == NULL)
+					return (false);
 				(*ast)->left->right->right->parent = malloc(sizeof(t_ast));
-				IF_RETURN((*ast)->left->right->right->parent == NULL, false)
+				if ((*ast)->left->right->right->parent == NULL)
+					return (false);
 				(*ast)->left->right->right->parent = (*ast)->left->right;
-				IF_RETURN(!fill_left_inside(&(*ast)->left->right, token), false)
+				if (!fill_left_inside(&(*ast)->left->right, token))
+					return (false);
 			}
 		}
 		ast = &((*ast)->left);
@@ -405,21 +446,26 @@ bool	fill_left_with_pipe(t_ast **ast, t_token *last)
 	{
 		last = find_next_ast_node_with_pipe(last->prev);
 		(*ast)->left = new_node(last);
-		IF_RETURN((*ast)->left == NULL, false)
+		if ((*ast)->left == NULL)
+			return (false);
 		(*ast)->left->parent = malloc(sizeof(t_ast));
-		IF_RETURN((*ast)->left->parent == NULL, false)
+		if ((*ast)->left->parent == NULL)
+			return (false);
 		(*ast)->left->parent = *ast;
 		if ((*ast)->left->identifier == CMD && last->next->identifier == ARGUMENT)
 		{
 			(*ast)->left->argv = insert_argv(last->next);
-			IF_RETURN((*ast)->left->argv == NULL, false)
+			if ((*ast)->left->argv == NULL)
+				return (false);
 		}
 		else if (is_operator(last->text[0]) && !is_operator(last->next->text[0]))
 		{
 			(*ast)->left->right = new_node(last->next); 		
-			IF_RETURN((*ast)->left->right, false)
+			if ((*ast)->left->right == NULL)
+				return (false);
 			(*ast)->left->right->parent = malloc(sizeof(t_ast));
-			IF_RETURN((*ast)->left->right->parent == NULL, false)
+			if ((*ast)->left->right->parent == NULL)
+				return (false);
 			(*ast)->left->right->parent = (*ast)->left;
 		}
 		ast = &((*ast)->left);
@@ -431,13 +477,17 @@ bool	fill_left_with_pipe(t_ast **ast, t_token *last)
 bool	create_ast_without_pipe(t_ast **ast, t_token *last)
 {
 	*ast = new_node(last);
-	IF_RETURN(*ast == NULL, false)
+	if (*ast == NULL)
+		return (false);
 	(*ast)->right = new_node(last->next);
-	IF_RETURN((*ast)->right == NULL, false)
+	if ((*ast)->right == NULL)
+		return (false);
 	(*ast)->right->parent = malloc(sizeof(t_ast));
-	IF_RETURN((*ast)->right->parent == NULL, false)
+	if ((*ast)->right->parent == NULL)
+		return (false);
 	(*ast)->right->parent = *ast;
-	IF_RETURN(!fill_left(ast, last), false)
+	if (!fill_left(ast, last))
+		return (false);
 	return (true);
 }
 
@@ -467,38 +517,48 @@ bool	create_ast_with_pipe(t_ast **ast, t_token *last)
 	t_token	*token;
 
 	*ast = new_node(last); 
-	IF_RETURN(*ast == NULL, false)
+	if (*ast == NULL)
+		return (false);
 	// TODO: RIGHT
 	if (!has_operator_with_pipe(last->next))
 	{
 		(*ast)->right = new_node(last->next);
-		IF_RETURN((*ast)->right == NULL, false)
+		if ((*ast)->right == NULL)
+			return (false);
 		(*ast)->right->parent = malloc(sizeof(t_ast));
-		IF_RETURN((*ast)->right->parent == NULL, false)
+		if ((*ast)->right->parent == NULL)
+			return (false);
 		(*ast)->right->parent = *ast;
 		if (last->next->next)
 		{
 			(*ast)->right->argv = insert_argv(last->next);
-			IF_RETURN((*ast)->right->argv == NULL, false)
+			if ((*ast)->right->argv == NULL)
+				return (false);
 		}
 	}
 	else
 	{
 		token = find_next_right_node(last->next);
 		(*ast)->right = new_node(token);
-		IF_RETURN((*ast)->right == NULL, false)
+		if ((*ast)->right == NULL)
+			return (false);
 		(*ast)->right->parent = malloc(sizeof(t_ast));
-		IF_RETURN((*ast)->right->parent == NULL, false)
+		if ((*ast)->right->parent == NULL)
+			return (false);
 		(*ast)->right->parent = *ast;
 		(*ast)->right->right = new_node(token->next);
-		IF_RETURN((*ast)->right->right == NULL, false)
+		if ((*ast)->right->right == NULL)
+			return (false);
 		(*ast)->right->right->parent = malloc(sizeof(t_ast));
-		IF_RETURN((*ast)->right->right->parent == NULL, false)
+		if ((*ast)->right->right->parent == NULL)
+			return (false);
 		(*ast)->right->right->parent = (*ast)->right;
-		IF_RETURN(!fill_left_with_pipe(&(*ast)->right, token), false)
+		if (!fill_left_with_pipe(&(*ast)->right, token))
+			return (false);
 	}
 	// TODO: LEFT
-	IF_RETURN(!fill_left_with_pipe_parent(ast, last), false)
+	if (!fill_left_with_pipe_parent(ast, last))
+		return (false);
 	return (true);
 }
 
@@ -511,7 +571,8 @@ t_ast	*parse(t_token *token_root)
 	if (!has_operator(token_root))
 	{
 		ast = create_cmd(token_root);
-		IF_RETURN(!ast, NULL)
+		if (!ast)
+			return (NULL);
 	}
 	else
 	{
@@ -520,13 +581,15 @@ t_ast	*parse(t_token *token_root)
 		{
 			while (!is_operator(last->text[0]))
 				last = last->prev;
-			IF_RETURN(!create_ast_without_pipe(&ast, last), NULL)
+			if (!create_ast_without_pipe(&ast, last))
+				return (NULL);
 		}
 		else
 		{
 			while (last->text[0] != '|')
 				last = last->prev;
-			IF_RETURN(!create_ast_with_pipe(&ast, last), NULL)
+			if (!create_ast_with_pipe(&ast, last))
+				return (NULL);
 		}
 	}
 	return (ast);

@@ -6,7 +6,7 @@
 /*   By: irazafim <irazafim@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/19 09:57:02 by irazafim          #+#    #+#             */
-/*   Updated: 2024/10/22 12:36:30 by pmihangy         ###   ########.fr       */
+/*   Updated: 2024/11/07 12:29:26 by pmihangy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,8 +27,10 @@ int    cd_minishell(char *argv[], char ***env)
 	else
 	{
 		getcwd(pwd, sizeof(pwd));
-		IF_RETURN(!env_update(env, ft_strjoin("OLDPWD=", old_pwd)), 1)
-		IF_RETURN(!env_update(env, ft_strjoin("PWD=", pwd)), 1)
+		if (!env_update(env, ft_strjoin("OLDPWD=", old_pwd)))
+			return (1);
+		if (!env_update(env, ft_strjoin("PWD=", pwd)))
+			return (1);
 	}
 	return (0);
 }
