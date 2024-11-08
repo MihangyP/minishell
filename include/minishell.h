@@ -32,7 +32,7 @@
 
 typedef void (*sighandler_t)(int);
 
-typedef enum	e_identifier
+typedef enum	e_id
 {
 	CMD,
 	ARGUMENT,
@@ -41,12 +41,12 @@ typedef enum	e_identifier
 	DOUBLE_LEFT_REDIRECTION,
 	DOUBLE_RIGHT_REDIRECTION,
 	PIPE
-}	t_identifier;
+}	t_id;
 
 typedef struct	s_token
 {
 	char			*text;
-	t_identifier	identifier;
+	t_id			id;
 	struct s_token	*prev;
 	struct s_token	*next;
 }	t_token;
@@ -54,18 +54,12 @@ typedef struct	s_token
 typedef struct	s_ast
 {
 	char			*text;
-	t_identifier	identifier;
+	t_id			id;
 	char			**argv;
 	struct s_ast	*left;
 	struct s_ast	*right;
 	struct s_ast	*parent;
 }	t_ast;
-
-typedef struct	s_verif
-{
-	bool	res;
-	char	*name;
-}	t_verif;
 
 /* prototypes */
 
@@ -76,11 +70,12 @@ bool	has_open_quote(char *entry, bool found_peer, int i);
 bool	is_space(char c);
 void	print_tokens(t_token *root);
 void	print_ast(t_ast *ast, int indent);
-t_verif	*validate(t_token *token_root, char *path, char **builtins);
+void	validate(t_token *token_root, char *path);
 char	*get_path(char **env);
 bool	insert_builtins(char **builtins);
 bool	is_in(char *needle, char **haystack);
 char	*get_dir_path(char *cmd, char *path);
+void	error(const char *err_message);
 
 /* parser */
 
@@ -92,7 +87,7 @@ bool	insert_cmd_token(char *entry, t_token **root, int *i);
 bool	is_operator(char c);
 bool	has_an_env(char *text);
 /* list manip */
-t_token	*new_token(char *text, t_identifier identifier);
+t_token	*new_token(char *text, t_id identifier);
 t_token	*tokens_find_last(t_token *root);
 size_t	list_size(t_token *token);
 void	tokens_append(t_token **root, t_token *new_el);

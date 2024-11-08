@@ -24,7 +24,7 @@ void	print_tokens(t_token *root)
 	curr = root;
 	while (curr)
 	{
-		printf("text: %s, identifier: %d\n", curr->text, curr->identifier);
+		printf("text: %s, id: %d\n", curr->text, curr->id);
 		curr = curr->next;
 	}
 }
@@ -78,4 +78,10 @@ char	*get_dir_path(char *cmd, char *path)
 		++i;
 	}
 	return (NULL);
+}
+
+void	error(const char *err_message)
+{
+	printf("ERROR: %s\n", err_message);
+	exit(1);
 }

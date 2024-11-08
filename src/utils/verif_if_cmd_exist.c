@@ -131,34 +131,30 @@ bool	is_in(char *needle, char **haystack)
 	return (false);
 }
 
-t_verif	*validate(t_token *token_root, char *path, char **builtins)
+void	validate(t_token *token_root, char *path)
 {
-	t_verif	*result;
+	char		**builtins;
 
-	result = malloc(sizeof(t_verif));
-	if (!result)
-		return (NULL);
-	result->res = true;
-	result->name = NULL;
+	builtins = malloc(8 * sizeof(char *));
+	if (!builtins)
+		error("error on calling malloc");
+	if (!insert_builtins(builtins))
+		error("error on calling insert_builtins");
 	while (token_root)
 	{
-		if (token_root->identifier == CMD)
+		if (token_root->id == CMD)
 		{
 			if (!is_in(token_root->text, builtins))
 			{
 				if (!verify_if_in_path(token_root->text, path))
 				{
-					result->res = false;
-					result->name = ft_strdup(token_root->text);
-					if (!result->name)
-						return (NULL);
-					return (result);
+					printf("command '%s' not found\n", token_root->text);
+					break ;
 				}
 				else if (verify_if_in_path(token_root->text, path) == 2)
-					return (NULL);
+					error("error while calling verify_if_in_path");
 			}
 		}
 		token_root = token_root->next;
 	}
-	return (result);
 }

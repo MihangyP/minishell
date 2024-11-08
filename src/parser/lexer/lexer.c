@@ -108,11 +108,6 @@ bool	append_tokens(char *entry, t_token **root, int *i)
 	return (true);
 }
 
-void	error(const char *err_message)
-{
-	printf("ERROR: %s\n", err_message);
-	exit(1);
-}
 
 /*
  * This function divide the entry into a list of tokens

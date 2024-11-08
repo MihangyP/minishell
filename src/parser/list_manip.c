@@ -15,7 +15,7 @@
 /*
  * This function create a new token
  */
-t_token	*new_token(char *text, t_identifier identifier)
+t_token	*new_token(char *text, t_id identifier)
 {
 	t_token	*new;
 
@@ -23,7 +23,7 @@ t_token	*new_token(char *text, t_identifier identifier)
 	if (!new)
 		return (NULL);
 	new->text = text;
-	new->identifier = identifier;
+	new->id = identifier;
 	new->prev = NULL;
 	new->next = NULL;
 	return (new);
