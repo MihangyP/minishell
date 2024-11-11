@@ -6,7 +6,7 @@
 #    By: pmihangy <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/09/07 12:06:42 by pmihangy          #+#    #+#              #
-#    Updated: 2024/11/07 14:38:23 by pmihangy         ###   ########.fr        #
+#    Updated: 2024/11/11 09:27:21 by pmihangy         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -14,18 +14,9 @@
 NAME = minishell
 SRC = main.c 
 SRC_FILES = $(addprefix src/, $(SRC))
-LEXER_FILES = lexer.c expander.c
-AST_BUILDER_FILES = parser.c
-PARSER_FILES = bool.c list_manip.c utils.c
-PARSER_FILES += $(addprefix lexer/, $(LEXER_FILES))
-PARSER_FILES += $(addprefix ast_builder/, $(AST_BUILDER_FILES))
-UTILS_FILES = error.c utils.c verif_if_cmd_exist.c
-EXECUTION_FILES =  ## TODO
+UTILS_FILES = error.c
 BUILTINS_FILES = echo.c env.c export.c unset.c exit.c pwd.c cd.c
 SRC_FILES += $(addprefix src/utils/, $(UTILS_FILES))
-SRC_FILES += $(addprefix src/parser/, $(PARSER_FILES))
-SRC_FILES += $(addprefix src/execution/, $(EXECUTION_FILES))
-SRC_FILES += $(addprefix src/builtins/, $(BUILTINS_FILES))
 CC = cc -g
 CFLAGS = -Wall -Wextra #-Werror
 RM = rm -rf
