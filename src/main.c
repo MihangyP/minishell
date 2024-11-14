@@ -12,6 +12,145 @@
 
 #include <minishell.h>
 
+int	list_new_elem_str(t_lst **new, char *elem);
+void	add_first(t_lst **list, t_lst *new);
+size_t	len_list(t_lst *list);
+int	append(t_lst **lst, char *elem);
+int	free_list(t_lst **list);
+bool	make_env2(t_minishell *mshell);
+int	env_init(t_minishell *mshell, char **env);
+void	error(const char *err_mess);
+bool	is_space(char c);
+char	*get_path(char **env);
+bool	is_operator(char c);
+
+void	print_lst(t_lst *list)
+{
+	t_lst	*curr;
+
+	curr = list;
+	while (curr->next != list)
+	{
+		printf("%s\n", curr->str);
+		curr = curr->next;
+	}
+	printf("%s\n", curr->str);
+}
+
+int	list_new_elem_str(t_lst **new, char *elem)
+{
+	(*new) = malloc(sizeof(t_lst));
+	if (*new == NULL)
+		return (0);
+	(*new)->str = elem;
+	(*new)->next = NULL;
+	(*new)->prev = NULL;
+	return (1);
+}
+
+void	add_first(t_lst **list, t_lst *new)
+{
+	(*list) = new;
+	(*list)->prev = *list;
+	(*list)->next = *list;
+}
+
+size_t	len_list(t_lst *list)
+{
+	t_lst	*tmp;
+	size_t	i;
+
+	if ((list))
+	{
+		tmp = list;
+		i = 1;
+		while (tmp->next != list)
+		{
+			++i;
+			tmp = tmp->next;
+		}
+		return (i);
+	}
+	return (0);
+}
+
+int	append(t_lst **list, char *elem)
+{
+	t_lst	*new;
+
+	if (!list_new_elem_str(&new, elem))
+		return (0);
+	if (!(*list))
+		add_first(list, new);
+	else
+	{
+		new->prev = (*list)->prev;
+		new->next = (*list);
+		(*list)->prev->next = new;
+		(*list)->prev = new;
+	}
+	return (1);
+}
+
+int	free_list(t_lst **list)
+{
+	t_lst	*tmp;
+	t_lst	*current;
+
+	if (!(*list))
+		return (0);
+	current = *list;
+	while (current->next != *list)
+	{
+		tmp = current;
+		current = current->next;
+		free(tmp->str);
+		free(tmp);
+	}
+	free(current->str);
+	free(current);
+	*list = NULL;
+	return (0);
+}
+
+bool	make_env2(t_minishell *mshell)
+{
+	char	path[PATH_MAX];
+	char	*tmp;
+
+	tmp = ft_strdup("OLDPWD");
+	if (!tmp || !append(&(mshell->env), tmp) || getcwd(path, PATH_MAX) == NULL)
+		exit(69);
+		/*free_all(mshell, ERR_MALLOC, EXT_MALLOC);*/
+	tmp = ft_strjoin("PWD=", path);
+	if (!tmp || !append(&(mshell->env), tmp))
+		exit(69);
+		/*free_all(mshell, ERR_MALLOC, EXT_MALLOC);*/
+	return (1);
+}
+
+int	env_init(t_minishell *mshell, char **env)
+{
+	t_lst	*list;
+	int		i;
+	char	*tmp;
+
+	if (!(*env))
+		return (make_env2(mshell));
+	i = -1;
+	list = NULL;
+	while (env[++i])
+	{
+		tmp = ft_strdup(env[i]);
+		if (!tmp)
+			return (free_list(&list));
+		if (!append(&list, tmp))
+			return (free_list(&list));
+	}
+	mshell->env = list;
+	return (1);
+}
+
 void	error(const char *err_mess)
 {
 	printf("ERROR: %s\n", err_mess);
@@ -185,38 +324,6 @@ void	expand(char **line)
 	*line = str;
 }
 
-/*bool	lexer(t_token **token_root, char *line, char **env)*/
-bool	lexer(char *line, char **env)
-{
-	expand(&line);
-	printf("line: %s\n", line);
-	/*tokenize(token_root, line);*/
-	// expander && lexer
-	/*if (!replace_dollar(&line, data) || !create_list_token(&data->token, line))*/
-	/*{*/
-		/*free(line);*/
-		/*free_all(data, ERR_MALLOC, EXT_MALLOC);*/
-	/*}*/
-	/*free(line);*/
-	/*print_token(data->token);*/
-	/*// node3<-node1 -> node2 -> node3->node1*/
-	/*if (data->token && data->token->prev->type == PIPE)*/
-	/*{*/
-		/*write(2, "Error: Unclosed pipe\n", 21);*/
-		/*data->exit_code = 2;*/
-		/*free_token(&data->token);*/
-		/*return (false);*/
-	/*}*/
-	/*if (!data->token || !create_list_cmd(data))*/
-	/*{*/
-		/*free_token(&data->token);*/
-		/*free_cmd(&data->cmd);*/
-		/*return (false);*/
-	/*}*/
-	/*return (check_pipe(data));*/
-	return (true);
-}
-
 void	handle_sigint(int signum)
 {
 	(void)signum;
@@ -232,12 +339,25 @@ void	listen_signals(void)
 	signal(SIGQUIT, SIG_IGN);
 }
 
-bool	repl(char ***env, char *path)
+void	minishell_init(t_minishell *mshell)
+{
+	mshell->env = NULL;
+	mshell->token = NULL;
+	mshell->cmd = NULL;
+	mshell->exit_code = 0;
+	mshell->pipefd[0] = -1;
+	mshell->pipefd[1] = -1;
+}
+
+bool	repl(char **env, char *path)
 {
 	char		*entry;
+	t_minishell	mshell;
 
 	(void)path;
-	(void)env;
+	minishell_init(&mshell);
+	env_init(&mshell, env);
+	print_lst(mshell.env);
 	listen_signals();
 	while (1)
 	{
@@ -252,14 +372,41 @@ bool	repl(char ***env, char *path)
 			printf("open quote\n");
 		else
 		{
-			/*lexer(token_root, entry, *env);	*/
-			lexer(entry, *env);	
+			/*lexer(entry, *env);	*/
 		}
 		free(entry);
 	}
 	rl_clear_history();
 	return (true);
 }
+
+/*int	main2(int argc, char **argv, char **env)*/
+/*{*/
+	/*t_data	data;*/
+	/*char	*line;*/
+
+	/*init_data(&data, argc, argv);*/
+	/*if (!make_env(&data, env))*/
+		/*free_all(&data, ERR_MALLOC, EXT_MALLOC);*/
+	/*while (1)*/
+	/*{*/
+		/*line = readline("minishell> ");*/
+		/*if (!line)*/
+			/*free_all(&data, "exit\n", data.exit_code);*/
+		/*if (empty_line(line))*/
+			/*continue ;*/
+		/*add_history(line);*/
+		/*if (!parseline(&data, line))*/
+			/*continue ;*/
+		/*if (!exec(&data))*/
+			/*free_all(&data, ERR_PIPE, EXT_PIPE);*/
+		/*free_cmd(&data.cmd);*/
+		/*free_token(&data.token);*/
+	/*}*/
+	/*rl_clear_history();*/
+	/*free_all(&data, NULL, -1);*/
+	/*return (0);*/
+/*}*/
 
 int	main(int ac, char **av, char **env)
 {
@@ -268,7 +415,7 @@ int	main(int ac, char **av, char **env)
 	(void)ac;
 	(void)av;
 	path = get_path(env);
-	if (!repl(&env, path))
+	if (!repl(env, path))
 		return (1);
 	return (0);
 }

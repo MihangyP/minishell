@@ -30,42 +30,51 @@
 
 /* structures and enums */
 
-typedef void (*sighandler_t)(int);
-
-typedef enum	e_identifier
+typedef enum	e_id
 {
-	CMD,
-	ARGUMENT,
-	LEFT_REDIRECTION,
-	RIGHT_REDIRECTION,
-	DOUBLE_LEFT_REDIRECTION,
-	DOUBLE_RIGHT_REDIRECTION,
+	CMD = 0,
+	ARG,
+	INPUT,
+	TRUNC,
+	HEREDOC,
+	APPEND,
 	PIPE
-}	t_identifier;
+}	t_id;
 
-typedef struct	s_token
+typedef struct s_lst
+{
+	char			*str;
+	struct s_lst	*prev;
+	struct s_lst	*next;
+}					t_lst;
+
+typedef struct s_token
 {
 	char			*text;
-	t_identifier	identifier;
+	int				id;
 	struct s_token	*prev;
 	struct s_token	*next;
-}	t_token;
+}				t_token;
 
-typedef struct	s_ast
+typedef struct s_cmd
 {
-	char			*text;
-	t_identifier	identifier;
-	char			**argv;
-	struct s_ast	*left;
-	struct s_ast	*right;
-	struct s_ast	*parent;
-}	t_ast;
+	bool			skip_cmd;
+	int				infile;
+	int				outfile;
+	char			**cmd_param;
+	struct s_cmd	*prev;
+	struct s_cmd	*next;
+}				t_cmd;
 
-typedef struct	s_verif
+typedef struct s_minishell
 {
-	bool	res;
-	char	*name;
-}	t_verif;
+	t_lst	*env;
+	t_token	*token;
+	t_cmd	*cmd;
+	int		exit_code;
+	int		pipefd[2];
+	bool	sq;
+}				t_minishell;
 
 /* prototypes */
 
@@ -74,11 +83,7 @@ bool	has_open_quote(char *entry, bool found_peer, int i);
 
 /* utils */
 bool	is_space(char c);
-void	print_tokens(t_token *root);
-void	print_ast(t_ast *ast, int indent);
-t_verif	*validate(t_token *token_root, char *path, char **builtins);
 char	*get_path(char **env);
-bool	insert_builtins(char **builtins);
 bool	is_in(char *needle, char **haystack);
 char	*get_dir_path(char *cmd, char *path);
 
