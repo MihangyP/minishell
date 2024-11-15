@@ -498,14 +498,15 @@ bool	parseline(t_minishell *mshell, char *line)
 	replace_dollar(&line, mshell);
 	create_list_token(&mshell->token, line);
 	print_token(mshell->token);
-	/*print_token(mshell->token);*/
-	/*if (mshell->token && mshell->token->prev->type == PIPE)*/
-	/*{*/
-		/*write(2, "Error: Unclosed pipe\n", 21);*/
-		/*mshell->exit_code = 2;*/
-		/*free_token(&mshell->token);*/
-		/*return (false);*/
-	/*}*/
+	if (mshell->token && mshell->token->prev->id == PIPE)
+	{
+		write(2, "Error: Unclosed pipe\n", 21);
+		mshell->exit_code = 2;
+		free_token(&mshell->token);
+		return (false);
+	}
+	/*if (mshell->token)*/
+		/*create_list_cmd(mshell); // TODO*/
 	/*if (!mshell->token || !create_list_cmd(mshell))*/
 	/*{*/
 		/*free_token(&mshell->token);*/
