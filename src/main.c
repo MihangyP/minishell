@@ -6,7 +6,7 @@
 /*   By: pmihangy <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/07 12:13:11 by pmihangy          #+#    #+#             */
-/*   Updated: 2024/11/11 10:21:26 by pmihangy         ###   ########.fr       */
+/*   Updated: 2024/11/16 08:33:54 by pmihangy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,6 +47,138 @@ int	is_special(char *str);
 void	add_first_list(t_lst **list, t_lst *new);
 int	token_new_elem(t_token **new, char *str, int type);
 void	print_token(t_token *token);
+bool	create_list_cmd(t_minishell *mshell);
+bool	norm(t_minishell *mshell, t_token *tmp);
+bool	fill_cmd(t_minishell *mshell, t_token *tmp);
+int	cmd_new_elem(t_cmd **new, int infile, int outfile, char **cmd_param);
+int	append_cmd(t_cmd **list, int infile, int outfile, char **cmd_param);
+char	**get_param(t_minishell *mshell, t_token *token);
+
+char	**get_param(t_minishell *mshell, t_token *token)
+{
+	char	**cmd_param;
+	int		i;
+	t_token	*tmp;
+
+	i = 0;
+	cmd_param = malloc(sizeof(char *) * (count_args(mshell, token) + 1));
+	if (cmd_param == NULL)
+		return (NULL);
+	tmp = token;
+	if (tmp->type != PIPE && (tmp->type == CMD || (tmp->type == ARG && \
+		tmp->prev != mshell->token->prev && tmp->prev->type > 5)) && \
+		!add_to_cmd_param(cmd_param, &i, tmp->str))
+		return (free_cmd_param(cmd_param, i));
+	tmp = tmp->next;
+	while (tmp != mshell->token && tmp->type != PIPE)
+	{
+		if ((tmp->type == CMD || (tmp->type == ARG && \
+			tmp->prev != mshell->token->prev && tmp->prev->type > 5)) && \
+			!add_to_cmd_param(cmd_param, &i, tmp->str))
+			return (free_cmd_param(cmd_param, i));
+		tmp = tmp->next;
+	}
+	cmd_param[i] = NULL;
+	return (cmd_param);
+}
+
+int	cmd_new_elem(t_cmd **new, int infile, int outfile, char **cmd_param)
+{
+	(*new) = malloc(sizeof(t_cmd));
+	if (*new == NULL)
+		return (0);
+	(*new)->skip_cmd = false;
+	(*new)->infile = infile;
+	(*new)->outfile = outfile;
+	(*new)->cmd_param = cmd_param;
+	(*new)->next = NULL;
+	(*new)->prev = NULL;
+	return (1);
+}
+
+int	append_cmd(t_cmd **list, int infile, int outfile, char **cmd_param)
+{
+	t_cmd	*new;
+
+	if (!cmd_new_elem(&new, infile, outfile, cmd_param))
+		return (0);
+	if (!(*list))
+	{
+		(*list) = new;
+		(*list)->prev = *list;
+		(*list)->next = *list;
+	}
+	else
+	{
+		new->prev = (*list)->prev;
+		new->next = (*list);
+		(*list)->prev->next = new;
+		(*list)->prev = new;
+	}
+	return (1);
+}
+
+bool	fill_cmd(t_minishell *mshell, t_token *tmp)
+{
+	if (!get_infile(mshell, tmp, mshell->cmd->prev) && \
+		mshell->cmd->prev->infile != -1)
+		return (false);
+	if (mshell->cmd->prev->infile == -1)
+	{
+		mshell->cmd->prev->skip_cmd = true;
+		mshell->cmd->prev->outfile = -1;
+		return (true);
+	}
+	if (!get_outfile(tmp, mshell->cmd->prev, mshell) && mshell->cmd->prev->outfile \
+		!= -1)
+		return (false);
+	if (mshell->cmd->prev->outfile == -1)
+	{
+		if (mshell->cmd->prev->infile >= 0)
+			close(mshell->cmd->prev->infile);
+		mshell->cmd->prev->skip_cmd = true;
+		mshell->cmd->prev->infile = -1;
+		return (true);
+	}
+	mshell->cmd->prev->cmd_param = get_param(mshell, tmp);
+	if (!mshell->cmd->prev->cmd_param)
+		exit(69);
+		/*free_all(mshell, ERR_MALLOC, EXT_MALLOC);*/
+	return (true);
+}
+
+bool	norm(t_minishell *mshell, t_token *tmp)
+{
+	if (!append_cmd(&mshell->cmd, -2, -2, NULL))
+		exit(69);
+		/*free_all(mshell, ERR_MALLOC, EXT_MALLOC);*/
+	if (!fill_cmd(mshell, tmp))
+	{
+		mshell->exit_code = 2;
+		return (false);
+	}
+	return (true);
+}
+
+bool	create_list_cmd(t_minishell *mshell)
+{
+	t_token	*tmp;
+
+	tmp = mshell->token;
+	if (!norm(mshell, tmp))
+		return (false);
+	tmp = tmp->next;
+	while (tmp != mshell->token)
+	{
+		if (tmp->prev->type == PIPE)
+		{
+			if (!norm(mshell, tmp))
+				return (false);
+		}
+		tmp = tmp->next;
+	}
+	return (true);
+}
 
 void	print_token(t_token *token)
 {
@@ -505,6 +637,8 @@ bool	parseline(t_minishell *mshell, char *line)
 		free_token(&mshell->token);
 		return (false);
 	}
+	if (mshell->token)
+		create_list_cmd(mshell);
 	/*if (mshell->token)*/
 		/*create_list_cmd(mshell); // TODO*/
 	/*if (!mshell->token || !create_list_cmd(mshell))*/
