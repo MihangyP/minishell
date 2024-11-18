@@ -23,10 +23,19 @@
 # include <sys/types.h>
 # include <sys/wait.h>
 # include <dirent.h>
+# include <sys/stat.h>
 # include <errno.h>
 # include <libft.h>
 
-/* structures and enums */
+/* defines structures and enums */
+
+# define ERR_MALLOC	"malloc error\n"
+# define ERR_PIPE	"pipe error\n"
+# define ERR_FORK	"fork error\n"
+
+# define EXT_MALLOC	1
+# define EXT_PIPE	1
+# define EXT_FORK	1
 
 typedef enum	e_id
 {
