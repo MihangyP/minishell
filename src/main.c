@@ -50,7 +50,6 @@ int	is_special(char *str);
 void	add_first_list(t_lst **list, t_lst *new);
 int	token_new_elem(t_token **new, char *str, int type);
 void	print_token(t_token *token);
-<<<<<<< HEAD
 bool	fill_cmd(t_minishell *mshell, t_token *tmp);
 bool	norm(t_minishell *mshell, t_token *tmp);
 bool	create_list_cmd(t_minishell *mshell);
@@ -1218,54 +1217,28 @@ int	add_to_cmd_param(char **cmd_param, int *i, char *str)
 	return (1);
 }
 
-char	**get_param(t_minishell *data, t_token *token)
-=======
-bool	create_list_cmd(t_minishell *mshell);
-bool	norm(t_minishell *mshell, t_token *tmp);
-bool	fill_cmd(t_minishell *mshell, t_token *tmp);
-int	cmd_new_elem(t_cmd **new, int infile, int outfile, char **cmd_param);
-int	append_cmd(t_cmd **list, int infile, int outfile, char **cmd_param);
-char	**get_param(t_minishell *mshell, t_token *token);
 
 char	**get_param(t_minishell *mshell, t_token *token)
->>>>>>> 91bb8d17489cc9f526b32ee75df909c7e1374237
 {
 	char	**cmd_param;
 	int		i;
 	t_token	*tmp;
 
 	i = 0;
-<<<<<<< HEAD
-	cmd_param = malloc(sizeof(char *) * (count_args(data, token) + 1));
-	if (cmd_param == NULL)
-		return (NULL);
-	tmp = token;
-	if (tmp->id != PIPE && (tmp->id == CMD || (tmp->id == ARG && \
-		tmp->prev != data->token->prev && tmp->prev->id > 5)) && \
-		!add_to_cmd_param(cmd_param, &i, tmp->text))
-		return (free_cmd_param(cmd_param, i));
-	tmp = tmp->next;
-	while (tmp != data->token && tmp->id != PIPE)
-	{
-		if ((tmp->id == CMD || (tmp->id == ARG && \
-			tmp->prev != data->token->prev && tmp->prev->id > 5)) && \
-			!add_to_cmd_param(cmd_param, &i, tmp->text))
-=======
 	cmd_param = malloc(sizeof(char *) * (count_args(mshell, token) + 1));
 	if (cmd_param == NULL)
 		return (NULL);
 	tmp = token;
-	if (tmp->type != PIPE && (tmp->type == CMD || (tmp->type == ARG && \
-		tmp->prev != mshell->token->prev && tmp->prev->type > 5)) && \
-		!add_to_cmd_param(cmd_param, &i, tmp->str))
+	if (tmp->id != PIPE && (tmp->id == CMD || (tmp->id == ARG && \
+		tmp->prev != mshell->token->prev && tmp->prev->id > 5)) && \
+		!add_to_cmd_param(cmd_param, &i, tmp->text))
 		return (free_cmd_param(cmd_param, i));
 	tmp = tmp->next;
-	while (tmp != mshell->token && tmp->type != PIPE)
+	while (tmp != mshell->token && tmp->id != PIPE)
 	{
-		if ((tmp->type == CMD || (tmp->type == ARG && \
-			tmp->prev != mshell->token->prev && tmp->prev->type > 5)) && \
-			!add_to_cmd_param(cmd_param, &i, tmp->str))
->>>>>>> 91bb8d17489cc9f526b32ee75df909c7e1374237
+		if ((tmp->id == CMD || (tmp->id == ARG && \
+			tmp->prev != mshell->token->prev && tmp->prev->id > 5)) && \
+			!add_to_cmd_param(cmd_param, &i, tmp->text))
 			return (free_cmd_param(cmd_param, i));
 		tmp = tmp->next;
 	}
@@ -1309,43 +1282,6 @@ int	append_cmd(t_cmd **list, int infile, int outfile, char **cmd_param)
 	return (1);
 }
 
-<<<<<<< HEAD
-bool	fill_cmd(t_minishell *data, t_token *tmp)
-{
-	if (!get_infile(data, tmp, data->cmd->prev) && \
-		data->cmd->prev->infile != -1)
-		return (false);
-	if (data->cmd->prev->infile == -1)
-	{
-		data->cmd->prev->skip_cmd = true;
-		data->cmd->prev->outfile = -1;
-		return (true);
-	}
-	if (!get_outfile(tmp, data->cmd->prev, data) && data->cmd->prev->outfile \
-		!= -1)
-		return (false);
-	if (data->cmd->prev->outfile == -1)
-	{
-		if (data->cmd->prev->infile >= 0)
-			close (data->cmd->prev->infile);
-		data->cmd->prev->skip_cmd = true;
-		data->cmd->prev->infile = -1;
-		return (true);
-	}
-	data->cmd->prev->cmd_param = get_param(data, tmp);
-	if (!data->cmd->prev->cmd_param)
-		free_all(data, ERR_MALLOC, EXT_MALLOC);
-	return (true);
-}
-
-bool	norm(t_minishell *data, t_token *tmp)
-{
-	if (!append_cmd(&data->cmd, -2, -2, NULL))
-		free_all(data, ERR_MALLOC, EXT_MALLOC);
-	if (!fill_cmd(data, tmp))
-	{
-		data->exit_code = 2;
-=======
 bool	fill_cmd(t_minishell *mshell, t_token *tmp)
 {
 	if (!get_infile(mshell, tmp, mshell->cmd->prev) && \
@@ -1370,40 +1306,22 @@ bool	fill_cmd(t_minishell *mshell, t_token *tmp)
 	}
 	mshell->cmd->prev->cmd_param = get_param(mshell, tmp);
 	if (!mshell->cmd->prev->cmd_param)
-		exit(69);
-		/*free_all(mshell, ERR_MALLOC, EXT_MALLOC);*/
+		free_all(mshell, ERR_MALLOC, EXT_MALLOC);
 	return (true);
 }
 
 bool	norm(t_minishell *mshell, t_token *tmp)
 {
 	if (!append_cmd(&mshell->cmd, -2, -2, NULL))
-		exit(69);
-		/*free_all(mshell, ERR_MALLOC, EXT_MALLOC);*/
+		free_all(mshell, ERR_MALLOC, EXT_MALLOC);
 	if (!fill_cmd(mshell, tmp))
 	{
 		mshell->exit_code = 2;
->>>>>>> 91bb8d17489cc9f526b32ee75df909c7e1374237
 		return (false);
 	}
 	return (true);
 }
 
-<<<<<<< HEAD
-bool	create_list_cmd(t_minishell *data)
-{
-	t_token	*tmp;
-
-	tmp = data->token;
-	if (!norm(data, tmp))
-		return (false);
-	tmp = tmp->next;
-	while (tmp != data->token)
-	{
-		if (tmp->prev->id == PIPE)
-		{
-			if (!norm(data, tmp))
-=======
 bool	create_list_cmd(t_minishell *mshell)
 {
 	t_token	*tmp;
@@ -1414,10 +1332,9 @@ bool	create_list_cmd(t_minishell *mshell)
 	tmp = tmp->next;
 	while (tmp != mshell->token)
 	{
-		if (tmp->prev->type == PIPE)
+		if (tmp->prev->id == PIPE)
 		{
 			if (!norm(mshell, tmp))
->>>>>>> 91bb8d17489cc9f526b32ee75df909c7e1374237
 				return (false);
 		}
 		tmp = tmp->next;
@@ -1882,14 +1799,10 @@ bool	parseline(t_minishell *mshell, char *line)
 		return (false);
 	}
 	if (mshell->token)
-<<<<<<< HEAD
 		create_list_cmd(mshell); // TODO
 	return (check_pipe(mshell));
-=======
-		create_list_cmd(mshell);
 	/*if (mshell->token)*/
 		/*create_list_cmd(mshell); // TODO*/
->>>>>>> 91bb8d17489cc9f526b32ee75df909c7e1374237
 	/*if (!mshell->token || !create_list_cmd(mshell))*/
 	/*{*/
 		/*free_token(&mshell->token);*/
